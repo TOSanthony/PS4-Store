@@ -516,10 +516,8 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             }
         }
 
-        // --- ON S'ASSURE QUE LA PROVENANCE EST BIEN LA GRILLE PRINCIPALE ---
-        menu_pos.z = ON_MAIN_SCREEN;
-        // ------------------------------------------------------------------
-
+        // On laisse bien ON_ITEM_INFO pour que la page de téléchargement s'affiche
+        menu_pos.z = ON_ITEM_INFO;
         active_p = download_panel;  active_p->is_shown = 1;
         GLES2_refresh_sysinfo();
         icon_panel->mtx.lock();
@@ -530,7 +528,7 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 download_panel->item_d[0].token_d[0].off = download_panel_text[0] = getLangSTR(REINSTALL_APP);
         }
         else if (games[idx].update_status == APP_NOT_INSTALLED){
-                download_panel->item_d[0].token_d[0].off = download_panel_text[0] = set.auto_install.load() ? getLangSTR(DL_AND_IN) : getLangSTR(DL2);
+                download_panel_text[0] = set.auto_install.load() ? getLangSTR(DL_AND_IN) : getLangSTR(DL2);
         }
         icon_panel->mtx.unlock();
         goto refresh_active_panel;
@@ -593,7 +591,7 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
         active_p = left_panel2; // back to Left panel
         active_p->page_sel.x = 0;
     }
-    else if (l == download_panel)
+else if (l == download_panel)
     {
         // --- VÉRIFIER SI ON VENAIT DE LA FILE D'ATTENTE (QUEUE) ---
         if (menu_pos.z == ON_QUEUE)
@@ -613,7 +611,7 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
         active_p->vbo_s = ASK_REFRESH;
         left_panel2->vbo_s = ASK_REFRESH;
 
-        // Si on est sur le menu principal des groupes :
+        // Restauration propre de la position de l'élément sans saut aléatoire
         if (left_panel2->page_sel.x == 0 && left_panel2->curr_item >= 0 && left_panel2->curr_item <= 6) {
             int current_group = left_panel2->curr_item;
             
@@ -623,13 +621,14 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
             if (!aux.empty() && aux[0].len) {
                 icon_panel->item_c = aux[0].len;
                 
-                // --- CORRECTION : RESTAURER PRÉCISÉMENT LA POSITION DE L'ICÔNE ---
-                // On s'assure que la page et le curseur pointent exactement sur l'élément en cours
+                // Recalcul propre de la page et de la sélection locale basées sur curr_item
                 int target_idx = icon_panel->curr_item;
                 int per_page = icon_panel->fieldsize.x * icon_panel->fieldsize.y;
                 
-                icon_panel->page_sel.x = target_idx / per_page;
-                icon_panel->f_sele = target_idx % per_page;
+                if (per_page > 0) {
+                    icon_panel->page_sel.x = target_idx / per_page;
+                    icon_panel->f_sele = target_idx % per_page;
+                }
                 
                 layout_update_sele(icon_panel, 0); 
             }
