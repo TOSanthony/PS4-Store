@@ -555,24 +555,28 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
         log_info("layout_dispatch_O: icon_panel");
         menu_pos.z = ON_LEFT_PANEL;
 
-        // Nettoyage sécurisé de l'auxiliaire
+        // Nettoyage de l'auxiliaire
         if (!aux.empty()) {
             aux.clear();
         }
 
-        // --- MASQUER LA GRILLE DE DROITE QUAND ON RETOURNE AU MENU DE GAUCHE ---
+        // --- CORRECTION : Restaurer le nombre total d'éléments de la vue principale ---
+        icon_panel->item_c = games[0].token_c;
+        icon_panel->item_d.clear();
+        icon_panel->item_d = games;
+        icon_panel->item_d.resize(icon_panel->item_c);
+        // -------------------------------------------------------------------------
+
+        // Masquer la grille et remettre le focus à gauche
         icon_panel->is_shown = 0;
-        
-        // Remettre le panneau de gauche actif SANS écraser sa position actuelle (curr_item)
         active_p = left_panel2;
         left_panel2->page_sel.x = 0;
         left_panel2->item_c = 9;
         
-        // On met juste à jour les sélections graphiques sans réinitialiser l'index à 0 !
-        layout_update_sele(left_panel2, 0); // Laisse ltr->curr_item intact
+        layout_update_sele(left_panel2, 0); 
         left_panel2->vbo_s = ASK_REFRESH;
 
-        log_info("layout_dispatch_O: back to main menu from icon_panel, keeping index %d", left_panel2->curr_item);
+        log_info("layout_dispatch_O: back to main menu from icon_panel, restored item_c to %d", icon_panel->item_c);
     }
     else if (l == queue_panel || l == option_panel)
     {
