@@ -554,6 +554,9 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
             aux.clear();
         }
 
+        // --- MASQUER LA GRILLE DE DROITE QUAND ON RETOURNE AU MENU DE GAUCHE ---
+        icon_panel->is_shown = 0;
+        
         // Remettre le panneau de gauche actif SANS écraser sa position actuelle (curr_item)
         active_p = left_panel2;
         left_panel2->page_sel.x = 0;
