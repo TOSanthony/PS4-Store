@@ -602,8 +602,8 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
         left_panel2->mtx.lock();
         l->page_sel.x = 0, // back initial page
             l->vbo_s = ASK_REFRESH;
-        //l->item_c = 7, // num of texts
-        l->item_c = 6, // num of texts
+        l->item_c = 7, // num of texts
+        //l->item_c = 6, // num of texts
             l->curr_item = 0;
             log_info("layout_dispatch_O %i", l->item_c);
         layout_fill_item_from_list(l, new_panel_text[l->page_sel.x]);
