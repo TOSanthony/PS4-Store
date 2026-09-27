@@ -590,6 +590,18 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
     }
     else if (l == download_panel)
     {
+
+        // --- VÉRIFIER SI ON VENAIT DE LA FILE D'ATTENTE (QUEUE) ---
+        if (menu_pos.z == ON_QUEUE || /* ou une autre variable mémorisant l'état précédent */)
+        {
+            menu_pos.z = ON_QUEUE;
+            l = active_p = queue_panel;
+            queue_panel->is_shown = 1;
+            icon_panel->is_shown = 0; // S'assurer que la grille reste masquée
+            queue_panel->vbo_s = ASK_REFRESH;
+            return;
+        }
+        
         menu_pos.z = ON_MAIN_SCREEN;
         l = active_p = icon_panel; // back to Icon panel
         active_p->vbo_s = ASK_REFRESH;
