@@ -346,6 +346,7 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             if (l->curr_item == 5) {
                  if(update_check_finised){
                     Update_View(l);
+                 }
                  else{
                     left_panel2->mtx.unlock();
                     #ifdef __ORBIS__
