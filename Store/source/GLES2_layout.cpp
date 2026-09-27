@@ -184,39 +184,43 @@ static void layout_compose_text(std::shared_ptr<layout_t> &l, int idx, vec2 &pen
 
                 if(l->page_sel.x == 0) // on main page
                 {
-                    /* draw Installed_Apps, Groups, Ready_to_install, Queue total count numbers */
+                    /* draw group item counts and queue threads */
                     int ret        = 0,
                         req_status = 0;
-                    // one item label per line
-                    switch( idx )
-                    {
-                        case 1:  ret =   number_of_iapps(APP_PATH("../"));  break; // Installed_Apps has first reserved
-                        case 0:  ret =   games[0].token_c;  break; 
-                        case 2:  ret =  groups[0].token_c;  break; // Groups
-                        case 3: { 
-                            if (set.auto_install.load())
-                               req_status = INSTALLING_APP;
-                            else
-                                req_status = COMPLETED;
-
-                            break;
+                    
+                    // Les indices 0 à 6 correspondent directement aux 7 groupes
+                    if (idx >= 0 && idx <= 6) {
+                        if (groups.size() > (idx + 1)) {
+                            ret = groups[idx + 1].token_c;
                         }
-                        case 4:  req_status = RUNNING;  break; // Queue
-                        case 5:  ret = updates_counter.load();  break; // Updates
                     }
-                    // if requested, count threads
+                    else {
+                        // Pour les options en dessous des groupes
+                        switch( idx )
+                        {
+                            case 7: { // Queue (File d'attente) à l'index 7
+                                if (set.auto_install.load())
+                                    req_status = INSTALLING_APP;
+                                else
+                                    req_status = COMPLETED;
+                                break;
+                            }
+                            case 8: // Settings (Paramètres) à l'index 8 (pas de compteur numérique)
+                                ret = 0;
+                                break;
+                        }
+                    }
+
+                    // if requested, count threads for queue
                     if(req_status) {
                         ret = thread_count_by_status( req_status );
-                        if(idx == 4)
+                        if(idx == 7)
                             ret += thread_count_by_status( PAUSED );
                     }
 
                     if(ret > 0) // we counted at least one
                     {
-                        //add_text( l->vbo, sub_font, tmp.c_str(), &col, &pen);
                         l->vbo.add_text(sub_font, tmp, col, pen);
-                       // snprintf(&tmp[0], 63, "%d", ret);
-                        //log_info("ret: %d pen.x %.f pen.x %.f", ret, pen.x, pen.y);
                         tmp = std::to_string(ret);
                         texture_font_load_glyphs( sub_font, tmp.c_str() );
                         pen.x = 460 - tl;
