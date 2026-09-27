@@ -538,16 +538,6 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
         l->vbo_s = ASK_REFRESH;
         l->item_c = 9;     // num of texts
         l->curr_item = 0;
-
-        // MISE À JOUR DYNAMIQUE DES COMPTEURS DE GROUPES ICI :
-        for (int i = 0; i < 7; i++) {
-            int count = 0;
-            if (groups.size() > (i + 1)) {
-                count = groups[i + 1].token_c;
-            }
-            new_panel_text[0][i] = fmt::format("{} ({})", group_label[i], count);
-        }
-
         log_info("layout_dispatch_O %i", l->item_c);
         layout_fill_item_from_list(l, new_panel_text[l->page_sel.x]);
         layout_update_sele(l, 0);
