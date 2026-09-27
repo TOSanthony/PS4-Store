@@ -457,6 +457,7 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
         {
             // map aux AOS to selected group
             l->vbo_s = ASK_REFRESH;
+            layout_update_sele(l, 0);
             aux = groups[l->curr_item + 1].token_d;
             aux[0].len = groups[l->curr_item + 1].token_c;
 
