@@ -100,15 +100,14 @@ void GLES2_render_icon_list(int unused)
         l = GLES2_layout_init( count );
         l->bound_box =  (vec4){ 680, 900,   1096, 664 };
         l->fieldsize = (ivec2){ 5, 3 };
-        //ls_p->item_d = // create the first screen we will show
         layout_update_fsize(l);
-        // save panel
-        //icon_panel2 = l;
-        l->is_shown = 1;
+        
+        // CORRECTION : On initialise à 0 (masqué au démarrage)
+        l->is_shown = 0;
     }
 
-    if(l) {
-        l->is_shown = 1;
+    // CORRECTION : On ne force plus à 1, on respecte l'état actuel de is_shown
+    if(l && l->is_shown) {
         GLES2_render_layout_v2(l, 0);
     }
 //  log_info("%s returns", __FUNCTION__);
