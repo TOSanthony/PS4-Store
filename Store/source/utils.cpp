@@ -332,8 +332,8 @@ bool LoadOptions()
         set.opt[INI_PATH] = "/user/app/NPXS39041/settings.ini";
     }
     
-    //unsafe_source = is_source_unsafe(set.opt[CDN_URL]);
-	unsafe_source = false;
+    unsafe_source = is_source_unsafe(set.opt[CDN_URL]);
+	//unsafe_source = false;
 
     uint32_t lang = PS4GetLang();
     if (error) 
