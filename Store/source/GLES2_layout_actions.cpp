@@ -596,25 +596,24 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
     else if (l == download_panel)
     {
         // --- VÉRIFIER SI ON VENAIT DE LA FILE D'ATTENTE (QUEUE) ---
-        // Si menu_pos.z était ON_QUEUE avant d'entrer dans les infos, ou si active_p était queue_panel
         if (menu_pos.z == ON_QUEUE)
         {
             menu_pos.z = ON_QUEUE;
             l = active_p = queue_panel;
             queue_panel->is_shown = 1;
-            icon_panel->is_shown = 0; // S'assurer que la grille reste masquée
+            icon_panel->is_shown = 0;
             queue_panel->vbo_s = ASK_REFRESH;
             return;
         }
         
-        // --- SINON, RETOUR VERS LA GRILLE CLASSIQUE ---
+        // --- RETOUR VERS LA GRILLE DU JEU ---
         menu_pos.z = ON_MAIN_SCREEN;
         l = active_p = icon_panel; // back to Icon panel
-        icon_panel->is_shown = 1;  // Réafficher la grille puisqu'on revient sur la grille du groupe
+        icon_panel->is_shown = 1;  // Réafficher la grille
         active_p->vbo_s = ASK_REFRESH;
         left_panel2->vbo_s = ASK_REFRESH;
 
-        // Si on est sur le menu principal, on s'assure de garder le groupe actif
+        // Si on est sur le menu principal des groupes :
         if (left_panel2->page_sel.x == 0 && left_panel2->curr_item >= 0 && left_panel2->curr_item <= 6) {
             int current_group = left_panel2->curr_item;
             
@@ -623,6 +622,15 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
 
             if (!aux.empty() && aux[0].len) {
                 icon_panel->item_c = aux[0].len;
+                
+                // --- CORRECTION : RESTAURER PRÉCISÉMENT LA POSITION DE L'ICÔNE ---
+                // On s'assure que la page et le curseur pointent exactement sur l'élément en cours
+                int target_idx = icon_panel->curr_item;
+                int per_page = icon_panel->fieldsize.x * icon_panel->fieldsize.y;
+                
+                icon_panel->page_sel.x = target_idx / per_page;
+                icon_panel->f_sele = target_idx % per_page;
+                
                 layout_update_sele(icon_panel, 0); 
             }
         } else {
