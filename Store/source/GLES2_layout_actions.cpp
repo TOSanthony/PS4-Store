@@ -284,6 +284,12 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                     // --- AFFICHER LA GRILLE DE DROITE QUAND ON ENTRE DANS UN GROUPE ---
                     icon_panel->is_shown = 1; 
 
+                    // --- FORCER LE CHARGEMENT/TÉLÉCHARGEMENT DES ICÔNES DU GROUPE ---
+                    // Réinitialise les drapeaux pour autoriser le thread à télécharger les icônes de ce groupe tout de suite
+                    is_icons_finished = true;
+                    icons_thread_started = false;
+                    // -------------------------------
+                    
                     layout_update_sele(l, 0);
                 }
                 break;
