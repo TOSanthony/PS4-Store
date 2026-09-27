@@ -282,22 +282,41 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 break;
             }
 
+
+            // 2 Groups
+            //if (l->curr_item == 2) {
+            //    // set left_panel 3nd page
+            //    l->page_sel.x = 2,
+            //    l->item_c = groups[0].token_c;
+            //    l->curr_item = 0;
+            //    layout_update_sele(l, 0);
+            //    active_p = left_panel2;
+            //    break;
+            //}
+
             // 2 Groups
             if (l->curr_item == 2) {
                 // set left_panel 3nd page
-                // AJOUTE CETTE LIGNE POUR FORCER LE REFRESH COMME LES AUTRES MENUS :
-                l->vbo_s = ASK_REFRESH;
-                recreate_item_t(groups);
-                
-                l->page_sel.x = 2,
+                l->page_sel.x = 2;
                 l->item_c = groups[0].token_c;
                 l->curr_item = 0;
-                
+
+                // Extraire et charger les noms des groupes dans le panneau
+                std::vector<std::string> group_names;
+                for (int i = 1; i <= groups[0].token_c; i++) {
+                    if (!groups[i].token_d.empty()) {
+                        group_names.push_back(groups[i].token_d[0].off);
+                    }
+                }
+                layout_fill_item_from_list(l, group_names);
+
+                l->vbo_s = ASK_REFRESH;
                 layout_update_sele(l, 0);
                 active_p = left_panel2;
                 break;
             }
 
+            
             // variable length lists
             if (l->curr_item == 3
                 || l->curr_item == 4)
