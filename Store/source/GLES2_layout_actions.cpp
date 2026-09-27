@@ -543,61 +543,44 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
         layout_update_sele(l, 0);
         left_panel2->mtx.unlock();
     }
-    else
-        if (l == icon_panel)
-        {
-            log_info("layout_dispatch_O: icon_panel");
-            menu_pos.z = ON_LEFT_PANEL;
-            l->curr_item = 0;
+    else if (l == icon_panel)
+    {
+        log_info("layout_dispatch_O: icon_panel");
+        menu_pos.z = ON_LEFT_PANEL;
 
-        drop_aux:
-
-            if (!aux.empty()) // drop aux
-            {
-                l->item_c = games[0].token_c;
-                l->item_d.clear();
-                l->item_d = games;
-                l->item_d.resize(l->item_c);
-
-                //l->item_d = games;
-                log_info("dropping aux %i", l->item_c);
-               // std::copy(games.begin() + 1, games.end() , l->item_d.begin());
-                //std::copy(icon_panel->item_d.begin(), icon_panel->item_d.begin() + icon_panel->item_c, games.begin() + 1);
-     /*           int count = 0;
-                for (item_t num : icon_panel->item_d) {
-        if (!num.token_d.empty() && ID >= 0 && ID < num.token_d.size()) { // Check if num.token_d is not empty and ID is within the valid range
-            //std::cout << num.token_d[ID].off << " ";
-            log_info("game: %s %i %i", num.token_d[ID].off.c_str(), count, icon_panel->item_d.size()) ;
-        } else {
-            log_info("Invalid num.token_d or ID out of range");
+        // Nettoyage sécurisé de l'auxiliaire pour revenir à la vue globale/groupe
+        if (!aux.empty()) {
+            aux.clear();
         }
-        count++;
+
+        // Remettre le panneau de gauche actif et réinitialiser sa position
+        active_p = left_panel2;
+        left_panel2->curr_item = 0;
+        left_panel2->page_sel.x = 0;
+        left_panel2->item_c = 9;
+        
+        layout_update_sele(left_panel2, 0);
+        left_panel2->vbo_s = ASK_REFRESH;
+
+        log_info("layout_dispatch_O: back to main menu from icon_panel");
     }
-    log_info("ddddd aux %i", l->item_c);*/
-                aux.clear();
-            }
-            log_info("layout_dispatch_O: layout_update_sele is icon_panel %s", l == icon_panel ? "true" : "false");
-            layout_update_sele(l, 0);
-            active_p = left_panel2;    // back to Left panel
+    else if (l == queue_panel || l == option_panel)
+    {
+        menu_pos.z = ON_LEFT_PANEL;
+        active_p = left_panel2; // back to Left panel
+        active_p->page_sel.x = 0;
+    }
+    else if (l == download_panel)
+    {
+        menu_pos.z = ON_MAIN_SCREEN;
+        l = active_p = icon_panel; // back to Icon panel
+        active_p->vbo_s = ASK_REFRESH;
+        left_panel2->vbo_s = ASK_REFRESH;
+        
+        if (!aux.empty()) {
+            aux.clear();
         }
-        else
-            if (l == queue_panel
-                || l == option_panel)
-            {
-                menu_pos.z = ON_LEFT_PANEL;
-                active_p = left_panel2; // back to Left panel
-                active_p->page_sel.x = 0;
-            }
-            else
-                if ( l == download_panel)
-                {
-                    menu_pos.z = ON_MAIN_SCREEN;
-                    l = active_p = icon_panel; // back to Icon panel
-                    active_p->vbo_s = ASK_REFRESH;
-                    left_panel2->vbo_s = ASK_REFRESH;
-
-                    goto drop_aux;
-                }
+    }
 }
 
 /* deal with menu position / actions */
