@@ -206,19 +206,13 @@ void fill_menu_text() {
   }
 
   // 2. Ensuite, assigner le menu principal (Page 0) avec les 9 éléments
-  // Afficher les groupes avec leur nombre d'éléments respectifs
-  // (groups[i+1].token_c contient le nombre d'éléments du groupe i)
-  for (int i = 0; i < 7; i++) {
-      int count = 0;
-      // Vérifie si le groupe existe et contient des données
-      if (groups.size() > (i + 1)) {
-          count = groups[i + 1].token_c;
-      }
-      // Concatène le nom du groupe et le nombre d'éléments entre parenthèses
-      new_panel_text[0][i] = fmt::format("{} ({})", group_label[i], count);
-  }
-
-  // Puis les options principales en dessous
+  new_panel_text[0][0] = group_label[0]; // Game
+  new_panel_text[0][1] = group_label[1]; // Patch / Emu
+  new_panel_text[0][2] = group_label[2]; // DLC
+  new_panel_text[0][3] = group_label[3]; // Theme
+  new_panel_text[0][4] = group_label[4]; // App
+  new_panel_text[0][5] = group_label[5]; // Unknown
+  new_panel_text[0][6] = group_label[6]; // Other
   new_panel_text[0][7] = getLangSTR(QUEUE);
   new_panel_text[0][8] = getLangSTR(SETTINGS);
 
