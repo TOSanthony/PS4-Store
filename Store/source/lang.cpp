@@ -208,26 +208,26 @@ void fill_menu_text() {
 
   //new_panel_text[0][6] = getLangSTR(SETTINGS);
   //new_panel_text[0][5] = getLangSTR(UPDATES);
-  new_panel_text[0][5] = getLangSTR(SETTINGS);
-  new_panel_text[0][4] = getLangSTR(QUEUE);
-  new_panel_text[0][3] = getLangSTR(RINSTALL);
-  new_panel_text[0][2] = getLangSTR(STRG);
-  new_panel_text[0][1] = getLangSTR(IAPPS);
-  new_panel_text[0][0] = getLangSTR(SAPPS);
+  //new_panel_text[0][5] = getLangSTR(SETTINGS);
+  //new_panel_text[0][4] = getLangSTR(QUEUE);
+  //new_panel_text[0][3] = getLangSTR(RINSTALL);
+  //new_panel_text[0][2] = getLangSTR(STRG);
+  //new_panel_text[0][1] = getLangSTR(IAPPS);
+  //new_panel_text[0][0] = getLangSTR(SAPPS);
 
   // Exemple d'organisation pour la page 0 :
   // Les 7 groupes d'abord (indices 0 à 6)
-  //new_panel_text[0][0] = group_label[0]; // Game
-  //new_panel_text[0][1] = group_label[1]; // Patch / Emu
-  //new_panel_text[0][2] = group_label[2]; // DLC
-  //new_panel_text[0][3] = group_label[3]; // Theme
-  //new_panel_text[0][4] = group_label[4]; // App
-  //new_panel_text[0][5] = group_label[5]; // Unknown
-  //new_panel_text[0][6] = group_label[6]; // Other
+  new_panel_text[0][0] = group_label[0]; // Game
+  new_panel_text[0][1] = group_label[1]; // Patch / Emu
+  new_panel_text[0][2] = group_label[2]; // DLC
+  new_panel_text[0][3] = group_label[3]; // Theme
+  new_panel_text[0][4] = group_label[4]; // App
+  new_panel_text[0][5] = group_label[5]; // Unknown
+  new_panel_text[0][6] = group_label[6]; // Other
   
   // Puis les options principales en dessous
-  //new_panel_text[0][7] = getLangSTR(QUEUE);
-  //new_panel_text[0][8] = getLangSTR(SETTINGS);
+  new_panel_text[0][7] = getLangSTR(QUEUE);
+  new_panel_text[0][8] = getLangSTR(SETTINGS);
 
   download_panel_text[1] = getLangSTR(INSTALL2);
   download_panel_text[0] = getLangSTR(DL2);
