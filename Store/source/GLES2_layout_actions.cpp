@@ -576,9 +576,25 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
         l = active_p = icon_panel; // back to Icon panel
         active_p->vbo_s = ASK_REFRESH;
         left_panel2->vbo_s = ASK_REFRESH;
-        
-        if (!aux.empty()) {
-            aux.clear();
+
+        // Si on est sur le menu principal (page 0), on recharge dynamiquement 
+        // le contenu du groupe actuellement sélectionné à gauche (ex: Patch = index 1)
+        if (left_panel2->page_sel.x == 0 && left_panel2->curr_item >= 0 && left_panel2->curr_item <= 6) {
+            int current_group = left_panel2->curr_item;
+            
+            // Charger les items de ce groupe spécifique
+            aux = groups[current_group + 1].token_d;
+            aux[0].len = groups[current_group + 1].token_c;
+
+            if (!aux.empty() && aux[0].len) {
+                icon_panel->curr_item = 0;
+                icon_panel->item_c = aux[0].len;
+                layout_update_sele(icon_panel, 0);
+            }
+        } else {
+            if (!aux.empty()) {
+                aux.clear();
+            }
         }
     }
 }
