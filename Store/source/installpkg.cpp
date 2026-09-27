@@ -10,7 +10,6 @@
 #include <ostream>
 #include <fstream>
 #include <sstream>
-#include <curl/curl.h>
 
 #if __has_include("<byteswap.h>")
 #include <byteswap.h>
@@ -144,9 +143,9 @@ bool bgft_init(void) {
         memset(s_bgft_init_params.heap, 0, s_bgft_init_params.heapSize);
     }
 
-    ret = sceBgftServiceIntInit(&s_bgft_init_params);
+    ret = sceBgftServiceInit(&s_bgft_init_params);
     if (ret) {
-        log_debug( "sceBgftServiceIntInit failed: 0x%08X", ret);
+        log_debug( "sceBgftInitialize failed: 0x%08X", ret);
         goto err_bgft_heap_free;
     }
 
@@ -176,9 +175,9 @@ void bgft_fini(void) {
         return;
     }
 
-    ret = sceBgftServiceIntTerm();
+    ret = sceBgftServiceTerm();
     if (ret) {
-        log_debug( "sceBgftServiceIntTerm failed: 0x%08X", ret);
+        log_debug( "sceBgftServiceTerm failed: 0x%08X", ret);
     }
 
     if (s_bgft_init_params.heap) {
@@ -251,246 +250,6 @@ bool pkg_is_patch(const char* src_dest) {
     }
 
     return false;
-}
-
-/* Forward declaration — defined below */
-void *install_prog(void* argument);
-
-uint32_t pkginstall_remote(const char* pkg_url, dl_arg_t* ta, bool Auto_install)
-{
-    int  ret = -1;
-    int  task_id = -1;
-    char buffer[255];
-
-    ta->status   = INSTALLING_APP;
-    ta->progress = 0.0f;
-
-    /*
-     * All required metadata is already present in ta->token_d[], loaded from
-     * the store DB by sql_index_tokens().  Use it directly — no extra HTTP
-     * range-request to read the PKG header is needed.
-     *
-     *   ID         -> title_id (e.g. "CUSA00000")
-     *   NAME       -> human-readable package name
-     *   SIZE       -> package size (numeric bytes string in the DB, or falls
-     *                 back to the HTTP content-length already fetched by
-     *                 ini_dl_req)
-     *   APPTYPE    -> "Base Game" / "Update" / "DLC" — used for patch routing
-     *   CONTENT_ID -> full PS4 content ID (e.g.
-     *                 "IV0002-CUSA00000_00-XXXXXXXXXXXXXXXX"), optional —
-     *                 only present when the CDN's DB schema provides a
-     *                 "content_id" column. Falls back to "" (matching prior
-     *                 behavior) when absent.
-     */
-    const std::string& title_id   = ta->token_d[ID].off;
-    const std::string& name       = ta->token_d[NAME].off;
-    const std::string& size_str   = ta->token_d[SIZE].off;
-    const std::string& apptype    = ta->token_d[APPTYPE].off;
-    const std::string& content_id = ta->token_d[CONTENT_ID].off;
-    const std::string& manifest_url = ta->token_d[MANIFEST].off;
-
-    /* BGFT's remote-URL registration path (sceBgftServiceIntDownloadRegisterTask)
-     * expects contentUrl to point to a JSON "piece manifest" describing the
-     * package (originalFileSize/packageDigest/pieces[]), not the raw .pkg
-     * file - see njzydark/PS4RPI's pkg_setup_prerequisites()/server.c. When
-     * the CDN provides one (currently: locally-hosted PKGs only), use it;
-     * otherwise fall back to the previous behavior of pointing straight at
-     * the raw package URL (e.g. for proxied remote-store items). */
-    const char* content_url = !manifest_url.empty() ? manifest_url.c_str() : pkg_url;
-
-    if (title_id.empty()) {
-        log_error("pkginstall_remote: title_id is empty — token_d not populated?");
-        return PKG_ERROR("pkginstall_remote: empty title_id", ret, ta);
-    }
-
-    /* Derive package_size. Prefer the content-length from the HTTP HEAD
-     * (already fetched by ini_dl_req via dl_from_url_v2) since it's an
-     * authoritative raw byte count. The DB's "Size" column is a *human
-     * formatted* string (e.g. "685.42 MB", see hb.js formatBytes()), NOT raw
-     * bytes — strtoul() on it would silently parse only the leading digits
-     * before the decimal point (e.g. 685), giving a wildly wrong byte count
-     * that's still non-zero, so it must only be used as a last resort. */
-    unsigned long pkg_size = 0;
-    if (ta->contentLength.load() > 0)
-        pkg_size = (unsigned long)ta->contentLength.load();
-
-    if (pkg_size == 0 && !size_str.empty()) {
-        char* end = nullptr;
-        unsigned long parsed = strtoul(size_str.c_str(), &end, 10);
-        if (end && end != size_str.c_str())
-            pkg_size = parsed;
-    }
-
-    if (!app_inst_util_init())
-        return PKG_ERROR("AppInstUtil", ret, ta);
-
-    if (!bgft_init())
-        return PKG_ERROR("BGFT_initialization", ret, ta);
-
-    /* Foreground user — required by BGFT */
-    int user_id = 0;
-    ret = sceUserServiceGetForegroundUser(&user_id);
-    if (ret) {
-        log_error("sceUserServiceGetForegroundUser failed: 0x%08X", ret);
-        return PKG_ERROR("sceUserServiceGetForegroundUser", ret, ta);
-    }
-
-    const std::string content_name = (!name.empty() ? name : title_id) + " via Store";
-    snprintf(buffer, sizeof(buffer) - 1, "%s", content_name.c_str());
-    log_info("%s", buffer);
-
-    const std::string& picpath_str = ta->token_d[PICPATH].off;
-    /* flatz's reference (both the remote-URL and StorageEx paths) always
-     * falls back to an empty string here, never a made-up local path — BGFT
-     * appears to validate/open a non-empty icon_path, so pointing it at a
-     * file that doesn't actually exist on the PS4 (this repo has no
-     * fakepic.png asset anywhere) is a plausible cause of an immediate
-     * registration failure (e.g. SCE_BGFT_ERROR_INVALID_PARAMETER). */
-    const char* icon_path = (!picpath_str.empty() && if_exists(picpath_str.c_str()))
-        ? picpath_str.c_str()
-        : "";
-
-    /* "Update" apptype means this is a patch PKG */
-    const bool is_patch = (apptype == "Update");
-
-    /* package_type is NOT a generic "PS4" string - BGFT validates it against
-     * specific per-content-type values. Confirmed against njzydark/PS4RPI's
-     * server.c (a real, working remote installer), which maps the PKG's
-     * actual content type to "PS4GD" (base game), "PS4AC" (DLC/additional
-     * content), "PS4AL", or "PS4DP" (patch) - never a bare "PS4". Passing an
-     * unrecognized value here is a very plausible cause of BGFT
-     * unconditionally rejecting registration with
-     * SCE_BGFT_ERROR_INVALID_PARAMETER regardless of how valid every other
-     * field is, since we don't have the raw PKG content_type enum available
-     * for remote (no local file) installs, derive the equivalent from the
-     * apptype string already resolved from the DB's APPTYPE/CATEGORY. */
-    const char* package_type = "PS4GD";
-    if (apptype == "DLC")
-        package_type = "PS4AC";
-    else if (apptype == "Update")
-        package_type = "PS4DP";
-
-    struct bgft_download_param_ex download_params;
-    memset(&download_params, 0, sizeof(download_params));
-    download_params.param.user_id            = user_id;
-    download_params.param.entitlement_type   = 5;
-    download_params.param.id                 = !content_id.empty() ? content_id.c_str() : "";
-    download_params.param.content_url        = content_url;
-    download_params.param.content_ex_url     = "";
-    download_params.param.content_name       = buffer;
-    download_params.param.icon_path          = icon_path;
-    download_params.param.sku_id             = "";
-    download_params.param.playgo_scenario_id = "0";
-    download_params.param.option             = BGFT_TASK_OPTION_DISABLE_CDN_QUERY_PARAM;
-    download_params.param.release_date       = "";
-    download_params.param.package_type       = package_type;
-    download_params.param.package_sub_type   = "";
-    download_params.param.package_size       = pkg_size;
-    download_params.slot                     = 0;
-
-    /* Log every field handed to BGFT so a registration failure (e.g. the
-     * kernel rejecting an empty/malformed content_id with
-     * SCE_BGFT_ERROR_INVALID_PARAMETER = 0x80990004) can be root-caused
-     * from store.log alone, without needing to reproduce interactively. */
-    log_info("pkginstall_remote params: user_id=%d entitlement_type=%d id='%s' url='%s' "
-             "name='%s' icon='%s' sku_id='%s' playgo='%s' option=0x%x release_date='%s' "
-             "package_type='%s' package_sub_type='%s' size=%u is_patch=%d",
-             user_id, download_params.param.entitlement_type, download_params.param.id,
-             content_url, buffer, icon_path, download_params.param.sku_id,
-             download_params.param.playgo_scenario_id, (unsigned int)download_params.param.option,
-             download_params.param.release_date, download_params.param.package_type,
-             download_params.param.package_sub_type, download_params.param.package_size,
-             (int)is_patch);
-
-    {
-        int retry = 0;
-        const int MAX_RETRIES = 2;
-        while (true) {
-            log_info("%s: registering task (is_patch=%d)", __FUNCTION__, (int)is_patch);
-            if (!is_patch) {
-                /* Call the toolchain's own statically-linked stub directly
-                 * (matches njzydark/PS4RPI's proven-working fix for this
-                 * exact SCE_BGFT_ERROR_INVALID_PARAMETER / 0x80990004 -
-                 * their bug was manually re-resolving BGFT functions by a
-                 * mix of "Int"/no-"Int" names via sceKernelDlsym(), and the
-                 * fix was to stop doing that and just use the toolchain's
-                 * correctly-named import). The real fix for our case was
-                 * bgft_init()/bgft_fini() calling the wrong (no "Int")
-                 * sceBgftServiceInit/sceBgftServiceTerm names, leaving BGFT
-                 * never properly initialized in the first place. */
-                ret = sceBgftServiceIntDownloadRegisterTask(&download_params.param, &task_id);
-            } else {
-                ret = sceBgftServiceIntDebugDownloadRegisterPkg(&download_params.param, &task_id);
-            }
-            if (ret == SCE_BGFT_ERROR_ALREADY_REGISTERED || ret == SCE_BGFT_ERROR_ALREADY_INSTALLED) {
-                if (++retry > MAX_RETRIES)
-                    return PKG_ERROR("sceBgftRegisterTask (retry limit)", ret, ta);
-                ret = sceAppInstUtilAppUnInstall(title_id.c_str());
-                if (ret != 0)
-                    return PKG_ERROR("sceAppInstUtilAppUnInstall", ret, ta);
-                continue;
-            }
-            else if (ret)
-                return PKG_ERROR("sceBgftRegisterTask", ret, ta);
-            break;
-        }
-    }
-
-    log_info("Task ID(s): 0x%08X", task_id);
-
-    struct install_args* args = new install_args;
-    args->title_id  = title_id;
-    args->task_id   = task_id;
-    args->l         = ta;
-    args->path      = ""; /* no local file */
-    args->is_thread = !Auto_install;
-    args->delete_pkg = false; /* nothing to delete on disk */
-
-    if (Auto_install) {
-        ret = sceBgftServiceDownloadStartTask(task_id);
-        if (ret) { delete args; return PKG_ERROR("sceBgftDownloadStartTask", ret, ta); }
-        install_prog((void*)args); /* install_prog deletes args */
-    }
-    else if (set.Legacy_Install.load()) {
-        ret = sceBgftServiceDownloadStartTask(task_id);
-        if (ret) { delete args; return PKG_ERROR("sceBgftDownloadStartTask", ret, ta); }
-        pthread_t thread = 0;
-        ret = pthread_create(&thread, NULL, install_prog, (void*)args); /* install_prog deletes args */
-        log_debug("pthread_create for %x, ret:%d", task_id, ret);
-        if (ret == 0)
-            pthread_detach(thread);
-        else {
-            delete args;
-            /* No thread will monitor this task — stop it rather than
-             * leaving it running in the background with no progress
-             * tracking. */
-            sceBgftServiceDownloadStopTask(task_id);
-            return PKG_ERROR("pthread_create", ret, ta);
-        }
-    }
-    else {
-        ret = sceBgftServiceDownloadStartTask(task_id);
-        if (ret) {
-            delete args;
-            return PKG_ERROR("sceBgftServiceDownloadStartTask", ret, ta);
-        } else {
-            if (icon_panel && !icon_panel->item_d[ta->g_idx].token_d[ID].off.empty()) {
-                icon_panel->item_d[ta->g_idx].interruptible = false;
-                icon_panel->item_d[ta->g_idx].update_status = NO_UPDATE;
-                download_panel->item_d[0].token_d[0].off = download_panel_text[0] = getLangSTR(REINSTALL_APP);
-            }
-            ta->g_idx  = -1;
-            ta->status = READY;
-            layout_refresh_VBOs();
-            log_info("package successfully started in the background");
-            delete args;
-        }
-    }
-
-    log_info("%s(%s) done.", __FUNCTION__, pkg_url);
-    ta->dst.clear();
-
-    return 0;
 }
 
 void *install_prog(void* argument)
@@ -608,12 +367,7 @@ uint32_t pkginstall(const char *fullpath, dl_arg_t* ta, bool Auto_install)
 
     if( if_exists(fullpath) )
     {
-      /* Only (re-)initialize AppInstUtil when it's NOT already done - this
-       * was previously inverted (`if (sceAppInst_done)`), which meant a
-       * fresh install always skipped initialization here and relied on some
-       * other code path (e.g. app_inst_util_is_exists()) having already run
-       * first. Match the correct pattern used everywhere else in this file. */
-      if (!sceAppInst_done) {
+      if (sceAppInst_done) {
           log_info("Initializing AppInstUtil...");
 
           if (!app_inst_util_init())
@@ -629,58 +383,25 @@ uint32_t pkginstall(const char *fullpath, dl_arg_t* ta, bool Auto_install)
         if (ret) 
             return PKG_ERROR("sceAppInstUtilGetTitleIdFromPkg", ret, ta);
 
-        /* Foreground user — required by BGFT */
-        int user_id = 0;
-        ret = sceUserServiceGetForegroundUser(&user_id);
-        if (ret) {
-            log_error("sceUserServiceGetForegroundUser failed: 0x%08X", ret);
-            return PKG_ERROR("sceUserServiceGetForegroundUser", ret, ta);
-        }
 
         snprintf(buffer, 254, "%s via Store", title_id);
         log_info( "%s", buffer);
-
-        const std::string& picpath_str = ta->token_d[PICPATH].off;
-        const char* icon_path = (!picpath_str.empty() && if_exists(picpath_str.c_str()))
-            ? picpath_str.c_str()
-            : "";
-
-        /* Detect patch by reading the local PKG header */
-        const bool is_patch = pkg_is_patch(fullpath);
-
-        /* package_type must match a real BGFT-recognized value ("PS4GD" /
-         * "PS4AC" / "PS4AL" / "PS4DP"), not a generic "PS4" - see the same
-         * fix/comment in pkginstall_remote() above. Use the DB's APPTYPE
-         * token (already available on ta) the same way. */
-        const std::string& apptype = ta->token_d[APPTYPE].off;
-        const char* package_type = "PS4GD";
-        if (apptype == "DLC")
-            package_type = "PS4AC";
-        else if (apptype == "Update" || is_patch)
-            package_type = "PS4DP";
-
         struct bgft_download_param_ex download_params;
         memset(&download_params, 0, sizeof(download_params));
-        download_params.param.user_id            = user_id;
-        download_params.param.entitlement_type   = 5;
-        download_params.param.id                 = "";
-        download_params.param.content_url        = fullpath;
-        download_params.param.content_name       = buffer;
-        download_params.param.icon_path          = icon_path;
+        download_params.param.entitlement_type = 5;
+        download_params.param.id = "";
+        download_params.param.content_url = fullpath;
+        download_params.param.content_name = buffer;
+        download_params.param.icon_path = "/update/fakepic.png";
         download_params.param.playgo_scenario_id = "0";
-        download_params.param.option             = BGFT_TASK_OPTION_INVISIBLE;
-        download_params.param.package_type       = package_type;
-        download_params.param.package_sub_type   = "";
-        download_params.slot                     = 0;
+        download_params.param.option = BGFT_TASK_OPTION_INVISIBLE;
+
+        download_params.slot = 0;
 
     retry:
-        log_info("%s: registering task (is_patch=%d)", __FUNCTION__, (int)is_patch);
-        if (!is_patch) {
-            ret = sceBgftServiceIntDownloadRegisterTaskByStorageEx(&download_params, &task_id);
-        } else {
-            ret = sceBgftServiceIntDebugDownloadRegisterPkg(&download_params.param, &task_id);
-        }
-        if(ret == SCE_BGFT_ERROR_ALREADY_REGISTERED || ret == SCE_BGFT_ERROR_ALREADY_INSTALLED)
+        log_info("%s 1", __FUNCTION__);
+        ret = sceBgftServiceIntDownloadRegisterTaskByStorageEx(&download_params, &task_id);
+        if(ret == 0x80990088 || ret == 0x80990015)
         {
             ret = sceAppInstUtilAppUnInstall(&title_id[0]);
             if(ret != 0)
@@ -690,7 +411,7 @@ uint32_t pkginstall(const char *fullpath, dl_arg_t* ta, bool Auto_install)
 
         }
         else if(ret) 
-            return PKG_ERROR("sceBgftRegisterTask", ret, ta);
+            return PKG_ERROR("sceBgftServiceIntDownloadRegisterTaskByStorageEx", ret, ta);
         
 
         log_info("Task ID(s): 0x%08X", task_id);
