@@ -556,33 +556,29 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
         log_info("layout_dispatch_O: icon_panel");
         menu_pos.z = ON_LEFT_PANEL;
 
-        // Vider l'auxiliaire de la grille en toute sécurité
+        // 1. Vider proprement l'auxiliaire
         if (!aux.empty()) {
             aux.clear();
         }
 
-        // --- CORRECTION DU CRASH ---
-        // Restaurer la base 'games' dans l'icon_panel AVANT de quitter
-        // pour éviter tout problème d'index hors limites.
+        // 2. RESTAURER LA GRILLE PRINCIPALE AVANT DE QUITTER (Évite le Signal 11)
         icon_panel->item_c = games[0].token_c;
         icon_panel->item_d.clear();
         icon_panel->item_d = games;
         icon_panel->item_d.resize(icon_panel->item_c);
-        
-        // --- MASQUER LA GRILLE ---
+
+        // 3. Masquer la grille
         icon_panel->is_shown = 0;
 
-        // Remettre le focus sur le menu de gauche
+        // 4. Remettre le focus sur le menu de gauche sans perdre la position actuelle
         active_p = left_panel2;
+        left_panel2->page_sel.x = 0;
         left_panel2->item_c = 9;
-        // On force la page 0 mais on NE MET PAS left_panel2->curr_item à 0 !
-        left_panel2->page_sel.x = 0; 
         
-        // Mettre à jour l'affichage sans déplacer la sélection (movement = 0)
         layout_update_sele(left_panel2, 0); 
         left_panel2->vbo_s = ASK_REFRESH;
 
-        log_info("layout_dispatch_O: back to main menu, index kept at %d", left_panel2->curr_item);
+        log_info("layout_dispatch_O: back to main menu safely, keeping index %d", left_panel2->curr_item);
     }
     else if (l == queue_panel || l == option_panel)
     {
