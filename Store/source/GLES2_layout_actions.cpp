@@ -328,7 +328,6 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             //                show_prog = true;
             //                while(show_prog.load()){
             //                    usleep(100000);
-
             //                }
             //              }
             //              #endif
@@ -342,27 +341,24 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             //     }
             //    break;
             //}
-            
+
             // 5 Updates (todo)
             if (l->curr_item == 5) {
-                if(update_check_finised){
+                 if(update_check_finised){
                     Update_View(l);
-                }
-                else{
-                    //msgok(WARNING, "Please wait for the update check to finish");
+                 else{
                     left_panel2->mtx.unlock();
                     #ifdef __ORBIS__
                     if(options_dialog(getLangSTR(UPDATES_STILL_LOADING), getLangSTR(SHOW_PROG), getLangSTR(STAY_IN_BACKGROUND)) == 1){
-                        progstart(getLangSTR(CHECKING_FOR_UPDATES));
-                        show_prog = true;
-                        while(show_prog.load()){
-                            usleep(100000);
-
-                        }
+                      progstart(getLangSTR(CHECKING_FOR_UPDATES));
+                      show_prog = true;
+                      show_prog = true;
+                      while(show_prog.load()){
+                        usleep(100000);
+                      }
                     }
-                    #endif
-                    }
-                }
+                    #endif   
+                 }
                 break;
             }
             
