@@ -217,9 +217,9 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
         case ON_QUEUE:    req_status = RUNNING;    break;
         }
         
-        // --- ON MÉMORISE QU'ON VIENT DE LA FILE D'ATTENTE ---
-        // (Tu peux garder menu_pos.z à ON_QUEUE ou utiliser une variable dédiée)
-        // ----------------------------------------------------
+        // --- ON FORCE L'ÉTAT À ON_QUEUE POUR LE RETOUR ---
+        menu_pos.z = ON_QUEUE; 
+        // ------------------------------------------------
 
         // get index from selected thread info
         idx = thread_find_by_status(l->f_sele, req_status);
@@ -508,9 +508,6 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
 
     switch_to_download:
         loadmsg(getLangSTR(DL_CACHE));
-        //Check if Legacy is Enabled then check DL Counter for APP DL Page
-        //if(li->token_d) TID_VAILD
-        //CheckUpdate(l->item_d[l->curr_item].token_d[ ID ].off.c_str(), l->item_d[l->curr_item]);
         if (TID_VAILD)
         { 
             DL_CO = PENDING_DOWNLOADS;
@@ -519,7 +516,10 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             }
         }
 
-        menu_pos.z = ON_ITEM_INFO;
+        // --- ON S'ASSURE QUE LA PROVENANCE EST BIEN LA GRILLE PRINCIPALE ---
+        menu_pos.z = ON_MAIN_SCREEN;
+        // ------------------------------------------------------------------
+
         active_p = download_panel;  active_p->is_shown = 1;
         GLES2_refresh_sysinfo();
         icon_panel->mtx.lock();
