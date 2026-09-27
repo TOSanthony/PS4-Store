@@ -343,7 +343,7 @@ void GLES2_scene_init(int w, int h)
     log_info("game: %i back %i", games[0].token_c, games.size() - 1);
 
     // flag as to show it
-    icon_panel->is_shown = 1;
+    icon_panel->is_shown = 0;
     // set max_pages
     icon_panel->page_sel.y = icon_panel->item_c / (icon_panel->fieldsize.x * icon_panel->fieldsize.y);
 
@@ -574,7 +574,10 @@ void GLES2_scene_render(const char* query)
 
     GLES2_Draw_sysinfo();
 
-    GLES2_Draw_common_texts();
+    // N'afficher le titre et les textes communs de la grille que si la grille est visible
+    if (icon_panel && icon_panel->is_shown) {
+        GLES2_Draw_common_texts();
+    }
 
     layout_refresh_VBOs();
 }
