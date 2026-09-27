@@ -52,6 +52,10 @@ void layout_update_sele(std::shared_ptr<layout_t>  &l, int movement)
     l->item_sel.x == 0 && movement == -1)
     {
         log_info("layout_update_sele: switch to left_panel2");
+
+        // --- MASQUER LA GRILLE QUAND ON QUITTE VERS LA GAUCHE ---
+        icon_panel->is_shown = 0;
+        
         // drop aux
         //aux = NULL;
         aux.clear();
