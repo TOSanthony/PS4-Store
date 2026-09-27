@@ -262,140 +262,49 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
         left_panel2->mtx.lock();
         switch (l->page_sel.x)
         {
-        case 0: // first page
+        case 0: // first page (Menu principal)
         {
-            if (l->curr_item == 0) {
-                menu_pos.z = ON_MAIN_SCREEN;
-                // set left_panel 2nd page
-                l->page_sel.x = 1,
-                    l->item_c = 3,
+            // Supposons que tes 7 groupes occupent les index 0 à 6 :
+            if (l->curr_item >= 0 && l->curr_item <= 6) {
+                // Sauvegarde l'index du groupe sélectionné et bascule sur l'affichage des items de ce groupe
+                int group_index = l->curr_item;
+                
+                // Mappe les items du groupe vers l'affichage principal (comme le faisait l'ancien menu groupes)
+                aux = groups[group_index + 1].token_d;
+                aux[0].len = groups[group_index + 1].token_c;
+
+                // Afficher les résultats du groupe sur l'écran principal
+                if (!aux.empty() && aux[0].len) {
+                    log_info("Showing %d items for group %d", aux[0].len, group_index);
+                    menu_pos.z = ON_MAIN_SCREEN;
+                    l = active_p = icon_panel;
                     l->curr_item = 0;
-                layout_fill_item_from_list(l, new_panel_text[l->page_sel.x]);
-                layout_update_sele(l, 0);
-                active_p = icon_panel;
-                break;
-            }
-
-            if (l->curr_item == 1) {
-                menu_pos.z = ON_MAIN_SCREEN;
-                Install_View(l, "Itemzflow", NAME);
-                break;
-            }
-
-
-            // 2 Groups
-            //if (l->curr_item == 2) {
-            //    // set left_panel 3nd page
-            //    l->page_sel.x = 2,
-            //    l->item_c = groups[0].token_c;
-            //    l->curr_item = 0;
-            //    layout_update_sele(l, 0);
-            //    active_p = left_panel2;
-            //    break;
-            //}
-
-            // 2 Groups
-            if (l->curr_item == 2) {
-                // set left_panel 3nd page
-                l->page_sel.x = 2;
-                l->item_c = groups[0].token_c;
-                l->curr_item = 0;
-
-                // Extraire et charger les noms des groupes dans le panneau
-                std::vector<std::string> group_names;
-                for (int i = 1; i <= groups[0].token_c; i++) {
-                    if (!groups[i].token_d.empty()) {
-                        group_names.push_back(groups[i].token_d[0].off);
-                    }
+                    l->item_c = aux[0].len;
+                    layout_update_sele(l, 0);
                 }
-                layout_fill_item_from_list(l, group_names);
-
-                l->vbo_s = ASK_REFRESH;
-                layout_update_sele(l, 0);
-                active_p = left_panel2;
                 break;
             }
 
+            // Si tu as gardé d'autres options après les groupes (ex: Index 7 pour Queue, Index 8 pour Settings, etc.)
+            // Adapte ces indices selon l'ordre exact où tu as placé tes boutons dans new_panel_text[0] :
             
-            // variable length lists
-            if (l->curr_item == 3
-                || l->curr_item == 4)
-            {
-                if (l->f_sele == 3) menu_pos.z = ON_INSTALL;
-                else
-                    if (l->f_sele == 4) menu_pos.z = ON_QUEUE;
-                // activate and set focus
+            if (l->curr_item == 7) { // Exemple pour la File d'attente / Queue
+                menu_pos.z = ON_QUEUE;
                 queue_panel_init();
-                l = queue_panel; // switch control
-               // l->page_sel.x = 0;
-                l->is_active =
-                    l->is_shown = 1;
-                // reset selection to first entry
-                //l->item_sel   = (ivec2) (0);
+                l = queue_panel;
+                l->is_active = l->is_shown = 1;
                 layout_update_fsize(l);
-                active_p = queue_panel;  //active_p->is_shown = 1;
+                active_p = queue_panel;
                 break;
             }
 
-            // 5 Updates (todo)
-            //if (l->curr_item == 5) {
-            //     if(!unsafe_source){
-            //        if(update_check_finised){
-            //           Update_View(l);
-            //        }
-            //        else{
-            //              //msgok(WARNING, "Please wait for the update check to finish");
-            //              left_panel2->mtx.unlock();
-            //               #ifdef __ORBIS__
-            //              if(options_dialog(getLangSTR(UPDATES_STILL_LOADING), getLangSTR(SHOW_PROG), getLangSTR(STAY_IN_BACKGROUND)) == 1){
-            //                progstart(getLangSTR(CHECKING_FOR_UPDATES));
-            //                show_prog = true;
-            //                while(show_prog.load()){
-            //                    usleep(100000);
-            //                }
-            //              }
-            //              #endif
-            //        }
-            //     }
-            //     else{
-            //        #ifdef __ORBIS__
-            //        msgok(WARNING, "The Updates feature is not available on Unsafe CDNs");
-            //        #endif
-            //        log_info("unsafe source, skip update");
-            //     }
-            //    break;
-            //}
-
-            // 5 Updates (todo)
-            //if (l->curr_item == 5) {
-            //     if(update_check_finised){
-            //        Update_View(l);
-            //     }
-            //     else{
-            //        left_panel2->mtx.unlock();
-            //        #ifdef __ORBIS__
-            //        if(options_dialog(getLangSTR(UPDATES_STILL_LOADING), getLangSTR(SHOW_PROG), getLangSTR(STAY_IN_BACKGROUND)) == 1){
-            //          progstart(getLangSTR(CHECKING_FOR_UPDATES));
-            //          show_prog = true;
-            //          show_prog = true;
-            //          while(show_prog.load()){
-            //            usleep(100000);
-            //          }
-            //        }
-            //        #endif   
-            //     }
-            //    break;
-            //}
-            
-            if (l->curr_item == 5) {
+            if (l->curr_item == 8) { // Exemple pour les Paramètres / Settings
                 menu_pos.z = ON_SETTINGS;
-                active_p = option_panel;  //active_p->is_shown = 1;
+                active_p = option_panel;
+                active_p->is_shown = 1;
+                break;
             }
-            //if (l->curr_item == 6) {
-            //    menu_pos.z = ON_SETTINGS;
-            //    active_p = option_panel;  //active_p->is_shown = 1;
-            //}
-            
+
             // set status
             active_p->is_shown = 1;
         } 
