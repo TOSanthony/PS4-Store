@@ -233,15 +233,24 @@ void fill_menu_text() {
   option_panel_text[9] = getLangSTR(SETTINGS_10);
   download_panel_text[2] = getLangSTR(CANCEL);
 
-  for (int i = 0; i < 7; i++) {
-    if (unsafe_source)
+  //for (int i = 0; i < 7; i++) {
+    //if (unsafe_source)
         //group_label[i] = group_labels_non_pkg_zone[i];
-        log_info("group_label[%d] assigned to non-pkg-zone label: %s", i, group_label[i].c_str());
         
     //log_info("group_label[%d] = %s | unsafe_source %i", i, group_label[i].c_str(), unsafe_source);
+  //}
+
+  for (int i = 0; i < 7; i++) {
+      if (unsafe_source) {
+          group_label[i] = group_labels_non_pkg_zone[i];
+          log_info("group_label[%d] assigned to non-pkg-zone label: %s", i, group_label[i].c_str());
+      } else {
+          group_label[i] = group_labels_non_pkg_zone[i];
+          log_info("group_label[%d] using default label: %s", i, group_label[i].c_str());
+      }
   }
 
-
+    
 }
 // OVERWRITE_SAVE
 extern uint8_t lang_ini[];
