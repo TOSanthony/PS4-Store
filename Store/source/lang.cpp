@@ -205,8 +205,9 @@ void fill_menu_text() {
   new_panel_text[1][2] = getLangSTR(FILTER_BY);
   new_panel_text[1][1] = getLangSTR(SORT_BY);
   new_panel_text[1][0] = getLangSTR(SEARCH);
-  new_panel_text[0][6] = getLangSTR(SETTINGS);
-  new_panel_text[0][5] = getLangSTR(UPDATES);
+  //new_panel_text[0][6] = getLangSTR(SETTINGS);
+  //new_panel_text[0][5] = getLangSTR(UPDATES);
+  new_panel_text[0][5] = getLangSTR(SETTINGS);
   new_panel_text[0][4] = getLangSTR(QUEUE);
   new_panel_text[0][3] = getLangSTR(RINSTALL);
   new_panel_text[0][2] = getLangSTR(STRG);
