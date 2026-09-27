@@ -265,12 +265,11 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
         {
         case 0: // first page (Menu principal)
         {
-            // Supposons que tes 7 groupes occupent les index 0 à 6 :
+            // Les 7 groupes occupent les index 0 à 6 :
             if (l->curr_item >= 0 && l->curr_item <= 6) {
-                // Sauvegarde l'index du groupe sélectionné et bascule sur l'affichage des items de ce groupe
                 int group_index = l->curr_item;
                 
-                // Mappe les items du groupe vers l'affichage principal (comme le faisait l'ancien menu groupes)
+                // Mappe les items du groupe vers l'affichage principal
                 aux = groups[group_index + 1].token_d;
                 aux[0].len = groups[group_index + 1].token_c;
 
@@ -281,15 +280,17 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                     l = active_p = icon_panel;
                     l->curr_item = 0;
                     l->item_c = aux[0].len;
+                    
+                    // --- AFFICHER LA GRILLE DE DROITE QUAND ON ENTRE DANS UN GROUPE ---
+                    icon_panel->is_shown = 1; 
+
                     layout_update_sele(l, 0);
                 }
                 break;
             }
 
-            // Si tu as gardé d'autres options après les groupes (ex: Index 7 pour Queue, Index 8 pour Settings, etc.)
-            // Adapte ces indices selon l'ordre exact où tu as placé tes boutons dans new_panel_text[0] :
-            
-            if (l->curr_item == 7) { // Exemple pour la File d'attente / Queue
+            // Options après les groupes (Index 7 pour Queue, Index 8 pour Settings)
+            if (l->curr_item == 7) { // File d'attente / Queue
                 menu_pos.z = ON_QUEUE;
                 queue_panel_init();
                 l = queue_panel;
@@ -299,7 +300,7 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 break;
             }
 
-            if (l->curr_item == 8) { // Exemple pour les Paramètres / Settings
+            if (l->curr_item == 8) { // Paramètres / Settings
                 menu_pos.z = ON_SETTINGS;
                 active_p = option_panel;
                 active_p->is_shown = 1;
