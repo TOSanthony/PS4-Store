@@ -205,6 +205,7 @@ void fill_menu_text() {
   new_panel_text[1][2] = getLangSTR(FILTER_BY);
   new_panel_text[1][1] = getLangSTR(SORT_BY);
   new_panel_text[1][0] = getLangSTR(SEARCH);
+
   //new_panel_text[0][6] = getLangSTR(SETTINGS);
   //new_panel_text[0][5] = getLangSTR(UPDATES);
   new_panel_text[0][5] = getLangSTR(SETTINGS);
@@ -212,7 +213,9 @@ void fill_menu_text() {
   new_panel_text[0][3] = getLangSTR(RINSTALL);
   new_panel_text[0][2] = getLangSTR(STRG);
   new_panel_text[0][1] = getLangSTR(IAPPS);
-  new_panel_text[0][0] = getLangSTR(SAPPS);
+  //new_panel_text[0][0] = getLangSTR(SAPPS);
+  new_panel_text[0][0] = group_label[0];
+    
   download_panel_text[1] = getLangSTR(INSTALL2);
   download_panel_text[0] = getLangSTR(DL2);
   group_label[6] = getLangSTR(OTHER);
