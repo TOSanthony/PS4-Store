@@ -285,12 +285,13 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             // 2 Groups
             if (l->curr_item == 2) {
                 // set left_panel 3nd page
+                // AJOUTE CETTE LIGNE POUR FORCER LE REFRESH COMME LES AUTRES MENUS :
+                l->vbo_s = ASK_REFRESH;
+                recreate_item_t(groups);
+                
                 l->page_sel.x = 2,
                 l->item_c = groups[0].token_c;
                 l->curr_item = 0;
-                
-                // AJOUTE CETTE LIGNE POUR FORCER LE REFRESH COMME LES AUTRES MENUS :
-                l->vbo_s = ASK_REFRESH;
                 
                 layout_update_sele(l, 0);
                 active_p = left_panel2;
@@ -460,8 +461,6 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
         case 2: // on Groups page
         {
             // map aux AOS to selected group
-            l->vbo_s = ASK_REFRESH;
-            layout_update_sele(l, 0);
             aux = groups[l->curr_item + 1].token_d;
             aux[0].len = groups[l->curr_item + 1].token_c;
 
