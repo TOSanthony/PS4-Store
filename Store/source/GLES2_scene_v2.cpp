@@ -842,11 +842,7 @@ install:
         {
             #ifdef __ORBIS__
             ta->is_threaded = false;
-            /* Use the remote URL stored in ta->url for direct BGFT install */
-            if (!ta->url.empty())
-                pkginstall_remote(ta->url.c_str(), ta, set.auto_install.load());
-            else
-                pkginstall(tmp.c_str(), ta, set.auto_install.load());
+            pkginstall(tmp.c_str(), ta, set.auto_install.load());
             #else
             log_info("install %s", tmp.c_str());
             // clean thread args for next job
