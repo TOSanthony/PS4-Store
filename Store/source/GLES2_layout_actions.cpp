@@ -548,21 +548,21 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
         log_info("layout_dispatch_O: icon_panel");
         menu_pos.z = ON_LEFT_PANEL;
 
-        // Nettoyage sécurisé de l'auxiliaire pour revenir à la vue globale/groupe
+        // Nettoyage sécurisé de l'auxiliaire
         if (!aux.empty()) {
             aux.clear();
         }
 
-        // Remettre le panneau de gauche actif et réinitialiser sa position
+        // Remettre le panneau de gauche actif SANS écraser sa position actuelle (curr_item)
         active_p = left_panel2;
-        left_panel2->curr_item = 0;
         left_panel2->page_sel.x = 0;
         left_panel2->item_c = 9;
         
-        layout_update_sele(left_panel2, 0);
+        // On met juste à jour les sélections graphiques sans réinitialiser l'index à 0 !
+        layout_update_sele(left_panel2, 0); // Laisse ltr->curr_item intact
         left_panel2->vbo_s = ASK_REFRESH;
 
-        log_info("layout_dispatch_O: back to main menu from icon_panel");
+        log_info("layout_dispatch_O: back to main menu from icon_panel, keeping index %d", left_panel2->curr_item);
     }
     else if (l == queue_panel || l == option_panel)
     {
