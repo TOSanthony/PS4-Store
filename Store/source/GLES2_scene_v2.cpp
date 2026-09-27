@@ -519,7 +519,12 @@ void GLES2_scene_render(const char* query)
     case ON_LEFT_PANEL:
     case ON_MAIN_SCREEN:
         GLES2_render_paged_list(0); // new way: left_panel2
-        GLES2_render_icon_list(0);  // new way: icon_panel clone
+
+        // --- N'afficher la grille de droite QUE SI elle est explicitement activée ---
+        if (icon_panel && icon_panel->is_shown) {
+            GLES2_render_icon_list(0);  // new way: icon_panel clone
+        }
+        
         if(!query_ran && query && icon_panel){
             for(auto &t: icon_panel->item_d){
 
