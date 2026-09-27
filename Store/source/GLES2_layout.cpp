@@ -557,6 +557,14 @@ void GLES2_render_layout_v2(std::shared_ptr<layout_t>  &l, int unused)
     std::vector<vec4> rr;
     if( !l ) return;
 
+    // --- CORRECTION DÉMARRAGE : Forcer l'affichage du 1er groupe sur icon_panel au lancement ---
+    if (l == icon_panel && aux.empty() && !groups.empty() && groups[1].token_c > 0) {
+        // Si l'écran principal n'a pas encore de filtre actif, on charge le groupe 0 (index 1 dans groups)
+        aux = groups[1].token_d;
+        aux[0].len = groups[1].token_c;
+        l->item_c = aux[0].len;
+    }
+    
 //  log_info("%s %p %d", __FUNCTION__, l->vbo, l->vbo_s);
 
     vec2 p, s,          // item position and size, in px
