@@ -362,17 +362,16 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             //     }
             //    break;
             //}
-
-            // 5 Updates (Masqué / Désactivé)
-            if (l->curr_item == 5) {
-                // Option masquée du menu : on ne fait rien ou on passe à la suite
-                break;
-            }
             
-            if (l->curr_item == 6) {
+            if (l->curr_item == 5) {
                 menu_pos.z = ON_SETTINGS;
                 active_p = option_panel;  //active_p->is_shown = 1;
             }
+            //if (l->curr_item == 6) {
+            //    menu_pos.z = ON_SETTINGS;
+            //    active_p = option_panel;  //active_p->is_shown = 1;
+            //}
+            
             // set status
             active_p->is_shown = 1;
         } 
@@ -603,7 +602,8 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
         left_panel2->mtx.lock();
         l->page_sel.x = 0, // back initial page
             l->vbo_s = ASK_REFRESH;
-        l->item_c = 7, // num of texts
+        //l->item_c = 7, // num of texts
+        l->item_c = 6, // num of texts
             l->curr_item = 0;
             log_info("layout_dispatch_O %i", l->item_c);
         layout_fill_item_from_list(l, new_panel_text[l->page_sel.x]);
