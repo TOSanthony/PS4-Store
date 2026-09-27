@@ -289,7 +289,9 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                     // Réinitialise les drapeaux pour autoriser le thread à télécharger les icônes de ce groupe tout de suite
                     is_icons_finished = true;
                     icons_thread_started = false;
-                    // -------------------------------
+                    // Déclenche le thread de chargement/téléchargement des icônes pour le nouvel ensemble d'items
+                    start_icons_thread(); 
+                    // ------------------------------------------------------------------
                     
                     layout_update_sele(l, 0);
                 }
