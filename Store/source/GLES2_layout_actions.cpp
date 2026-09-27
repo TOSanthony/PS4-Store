@@ -591,7 +591,7 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
         active_p = left_panel2; // back to Left panel
         active_p->page_sel.x = 0;
     }
-else if (l == download_panel)
+    else if (l == download_panel)
     {
         // --- VÉRIFIER SI ON VENAIT DE LA FILE D'ATTENTE (QUEUE) ---
         if (menu_pos.z == ON_QUEUE)
@@ -618,8 +618,14 @@ else if (l == download_panel)
             aux = groups[current_group + 1].token_d;
             aux[0].len = groups[current_group + 1].token_c;
 
-            if (!aux.empty() && aux[0].len) {
+            if (!aux.empty() && aux[0].len > 0) {
                 icon_panel->item_c = aux[0].len;
+                
+                // --- SÉCURITÉ ANTI-CRASH (Empêche l'index invalide) ---
+                if (icon_panel->curr_item < 0 || icon_panel->curr_item >= icon_panel->item_c) {
+                    icon_panel->curr_item = 0;
+                }
+                // -----------------------------------------------------
                 
                 // Recalcul propre de la page et de la sélection locale basées sur curr_item
                 int target_idx = icon_panel->curr_item;
