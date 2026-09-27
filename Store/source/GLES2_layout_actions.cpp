@@ -35,6 +35,7 @@ void set_cmp_token(const int index)
 static enum token_name label;
 
 extern std::atomic_bool is_icons_finished;
+extern std::atomic_bool icons_thread_started;
 
 void Install_View(std::shared_ptr<layout_t>  &l, const char* query_string, enum token_name nm)
 {
