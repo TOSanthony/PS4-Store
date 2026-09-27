@@ -234,7 +234,7 @@ void fill_menu_text() {
   download_panel_text[2] = getLangSTR(CANCEL);
 
   for (int i = 0; i < 7; i++) {
-    if (unsafe_source)
+    if (!unsafe_source)
         group_label[i] = group_labels_non_pkg_zone[i];
         
     //log_info("group_label[%d] = %s | unsafe_source %i", i, group_label[i].c_str(), unsafe_source);
