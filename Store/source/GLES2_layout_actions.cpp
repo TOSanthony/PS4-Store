@@ -288,6 +288,10 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 l->page_sel.x = 2,
                 l->item_c = groups[0].token_c;
                 l->curr_item = 0;
+                
+                // AJOUTE CETTE LIGNE POUR FORCER LE REFRESH COMME LES AUTRES MENUS :
+                l->vbo_s = ASK_REFRESH;
+                
                 layout_update_sele(l, 0);
                 active_p = left_panel2;
                 break;
