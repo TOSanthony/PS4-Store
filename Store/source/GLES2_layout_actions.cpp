@@ -216,6 +216,11 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
         }
         case ON_QUEUE:    req_status = RUNNING;    break;
         }
+        
+        // --- ON MÉMORISE QU'ON VIENT DE LA FILE D'ATTENTE ---
+        // (Tu peux garder menu_pos.z à ON_QUEUE ou utiliser une variable dédiée)
+        // ----------------------------------------------------
+
         // get index from selected thread info
         idx = thread_find_by_status(l->f_sele, req_status);
         if (menu_pos.z == ON_QUEUE && idx == -1)
@@ -590,9 +595,9 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
     }
     else if (l == download_panel)
     {
-
         // --- VÉRIFIER SI ON VENAIT DE LA FILE D'ATTENTE (QUEUE) ---
-        if (menu_pos.z == ON_QUEUE || /* ou une autre variable mémorisant l'état précédent */)
+        // Si menu_pos.z était ON_QUEUE avant d'entrer dans les infos, ou si active_p était queue_panel
+        if (menu_pos.z == ON_QUEUE)
         {
             menu_pos.z = ON_QUEUE;
             l = active_p = queue_panel;
@@ -602,8 +607,10 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
             return;
         }
         
+        // --- SINON, RETOUR VERS LA GRILLE CLASSIQUE ---
         menu_pos.z = ON_MAIN_SCREEN;
         l = active_p = icon_panel; // back to Icon panel
+        icon_panel->is_shown = 1;  // Réafficher la grille puisqu'on revient sur la grille du groupe
         active_p->vbo_s = ASK_REFRESH;
         left_panel2->vbo_s = ASK_REFRESH;
 
@@ -616,8 +623,6 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
 
             if (!aux.empty() && aux[0].len) {
                 icon_panel->item_c = aux[0].len;
-                // IMPORTANT : On NE touche PAS à icon_panel->curr_item pour garder la position de l'icône !
-                // On met juste à jour la sélection graphique sans réinitialiser l'index
                 layout_update_sele(icon_panel, 0); 
             }
         } else {
