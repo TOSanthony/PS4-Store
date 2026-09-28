@@ -259,12 +259,7 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
     }
 
     /* follows actions for panels */
-    if (l == left_panel2)
-    {
-        left_panel2->mtx.lock();
-        switch (l->page_sel.x)
-        {
-        case 0: // first page (Groupes + Rinstall + Queue + Settings)
+    case 0: // first page
         {
             // Les 7 groupes (0 à 6)
             if (l->curr_item >= 0 && l->curr_item <= 6) {
@@ -282,26 +277,49 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 break;
             }
 
-            // Index 7 (Rinstall) et Index 8 (Queue)
-            if (l->curr_item == 7 || l->curr_item == 8)
-            {
-                if (l->curr_item == 7) menu_pos.z = ON_INSTALL;
-                else if (l->curr_item == 8) menu_pos.z = ON_QUEUE;
-
-                queue_panel_init();
-                l = queue_panel;
-                l->is_active = l->is_shown = 1;
-                layout_update_fsize(l);
-                active_p = queue_panel;
-                break;
-            }
-
-            // Index 9 : Settings (Paramètres)
-            if (l->curr_item == 9) {
-                menu_pos.z = ON_SETTINGS;
-                active_p = option_panel;
-                active_p->is_shown = 1;
-                break;
+            // Si auto_install est OFF (10 éléments)
+            if (!set.auto_install.load()) {
+                if (l->curr_item == 7) { // Rinstall
+                    menu_pos.z = ON_INSTALL;
+                    queue_panel_init();
+                    l = queue_panel;
+                    l->is_active = l->is_shown = 1;
+                    layout_update_fsize(l);
+                    active_p = queue_panel;
+                    break;
+                }
+                if (l->curr_item == 8) { // Queue
+                    menu_pos.z = ON_QUEUE;
+                    queue_panel_init();
+                    l = queue_panel;
+                    l->is_active = l->is_shown = 1;
+                    layout_update_fsize(l);
+                    active_p = queue_panel;
+                    break;
+                }
+                if (l->curr_item == 9) { // Settings
+                    menu_pos.z = ON_SETTINGS;
+                    active_p = option_panel;
+                    active_p->is_shown = 1;
+                    break;
+                }
+            } 
+            else { // Si auto_install est ON (9 éléments, pas de Rinstall)
+                if (l->curr_item == 7) { // Queue
+                    menu_pos.z = ON_QUEUE;
+                    queue_panel_init();
+                    l = queue_panel;
+                    l->is_active = l->is_shown = 1;
+                    layout_update_fsize(l);
+                    active_p = queue_panel;
+                    break;
+                }
+                if (l->curr_item == 8) { // Settings
+                    menu_pos.z = ON_SETTINGS;
+                    active_p = option_panel;
+                    active_p->is_shown = 1;
+                    break;
+                }
             }
 
             active_p->is_shown = 1;
@@ -495,10 +513,24 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
     if (l == left_panel2)
     {
         left_panel2->mtx.lock();
-        l->page_sel.x = 0; // back initial page
+        l->page_sel.x = 0; // page initiale
         l->vbo_s = ASK_REFRESH;
-        l->item_c = 10;    // 7 groupes + Rinstall + Queue + Settings = 10 éléments au total
         l->curr_item = 0;
+
+        // Adaptation dynamique selon auto_install
+        if (set.auto_install.load()) {
+            // Auto-install ON : Pas de Rinstall (9 éléments : 0 à 6 = groupes, 7 = Queue, 8 = Settings)
+            l->item_c = 9;
+            new_panel_text[0][7] = getLangSTR(QUEUE);
+            new_panel_text[0][8] = getLangSTR(SETTINGS);
+        } else {
+            // Auto-install OFF : Avec Rinstall (10 éléments : 0 à 6 = groupes, 7 = Rinstall, 8 = Queue, 9 = Settings)
+            l->item_c = 10;
+            new_panel_text[0][7] = getLangSTR(RINSTALL);
+            new_panel_text[0][8] = getLangSTR(QUEUE);
+            new_panel_text[0][9] = getLangSTR(SETTINGS);
+        }
+
         log_info("layout_dispatch_O %i", l->item_c);
         layout_fill_item_from_list(l, new_panel_text[l->page_sel.x]);
         layout_update_sele(l, 0);
