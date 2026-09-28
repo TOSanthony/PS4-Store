@@ -438,7 +438,7 @@ void GLES2_Draw_sysinfo(void)
         }
 
         // update FMEM
-        dfp_fmem = (1. - (double)fmem / (double)0x8000000) * 100.;
+        //dfp_fmem = (1. - (double)fmem / (double)0x8000000) * 100.;
 
         // we eventually added glyphs... (todo: glyph cache)
         refresh_atlas();
