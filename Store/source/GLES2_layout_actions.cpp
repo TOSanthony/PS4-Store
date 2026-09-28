@@ -17,7 +17,7 @@
 
 
 extern std::vector<std::string> download_panel_text;
-extern std::vector<std::string> group_label; // <-- Ajoute cette ligne
+extern std::vector<std::string> group_label;
 extern bool unsafe_source;
 int DL_CO = -999;
 // related indexes from json.h enum
@@ -27,7 +27,7 @@ sort_patterns[11] = { 0, 1, 4, 5, 9, 10, 11, 12, 13, 16, 16 };
 
 /* set comparison token */
 void set_cmp_token(const int index)
-{    //cmp_token = index;
+{
     cmp_token = sort_patterns[index];
 }
 
@@ -269,11 +269,9 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             if (l->curr_item >= 0 && l->curr_item <= 6) {
                 int group_index = l->curr_item;
                 
-                // Mappe les items du groupe vers l'affichage principal
                 aux = groups[group_index + 1].token_d;
                 aux[0].len = groups[group_index + 1].token_c;
 
-                // Afficher les résultats du groupe sur l'écran principal
                 if (!aux.empty() && aux[0].len) {
                     log_info("Showing %d items for group %d", aux[0].len, group_index);
                     menu_pos.z = ON_MAIN_SCREEN;
@@ -281,12 +279,9 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                     l->curr_item = 0;
                     l->item_c = aux[0].len;
                     
-                    // Afficher la grille de droite
-                    //icon_panel->is_shown = 1; 
-
-                    // Forcer le chargement/rafraîchissement des icônes
-                    //is_icons_finished = true;
-                    //icons_thread_started = false;
+                    icon_panel->is_shown = 1; 
+                    is_icons_finished = true;
+                    icons_thread_started = false;
                     l->vbo_s = ASK_REFRESH;
                     
                     layout_update_sele(l, 0);
@@ -323,7 +318,6 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             {
                 memset(&pattern[0], 0, sizeof(pattern));
                 log_info("execute openDialogForSearch()");
-                // get char *pattern
                 if(!Keyboard("Store Keyboard", "", &pattern[0], false)) goto cancel_kb_search;
 
                 log_info("@@@@@@@@@  Search for: %s", pattern);
@@ -332,7 +326,6 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
 
             search_by_label:
                 destroy_item_t(q);
-                // build an array of search results
                 pattern_str = pattern;
                 log_info("Searching for '%s' ...", pattern_str.c_str());
                 q = search_item_t(icon_panel->item_d,
@@ -341,22 +334,17 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
 
             wen_found_hit:
 
-                if (!aux.empty() && aux[0].len) // we got results, address aux!
+                if (!aux.empty() && aux[0].len)
                 {
                     log_info("Showing %d items for '%s' @ %p", aux[0].len, aux[0].off.c_str(), &aux);
-                    //  for(int i = 0; i < aux[0].len; i++) { log_info("%d: %s %d", i, aux[i].off, aux[i].len); }
-                    // switch focus
                     menu_pos.z = ON_MAIN_SCREEN;
                     l = active_p = icon_panel;
-                    // reset selection to first entry
                     l->curr_item = 0;
                     l->item_c = aux[0].len;
                     layout_update_sele(l, 0);
-                    // but now we have aux array!
                 }
                 else
                 {
-
                     #ifdef __ORBIS__
                     sceKernelIccSetBuzzer(3);
                     #endif
@@ -369,25 +357,22 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             }
 
             if (l->curr_item == 1)  /* switch to Sort labels */
-            {   // set left_panel 4th page
+            {
                 l->page_sel.x = 3,
                     l->item_c = 11;
                 active_p = left_panel2;
-
                 goto switch_page;
             }
-            // filter
+
             if (l->curr_item == 2)  /* switch to Filter_by */
-            {   // set left_panel 5th page
+            {
                 l->page_sel.x = 4,
                     l->item_c = 2;
                 active_p = left_panel2;
             switch_page:
                 l->curr_item = 0;
                 layout_fill_item_from_list(l, new_panel_text[l->page_sel.x]);
-
                 layout_update_sele(l, 0);
-
                 goto refresh_active_panel;
             }
 
@@ -395,10 +380,8 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
 
         case 2: // on Groups page
         {
-            // map aux AOS to selected group
             aux = groups[l->curr_item + 1].token_d;
             aux[0].len = groups[l->curr_item + 1].token_c;
-
             goto wen_found_hit;
         } break;
 
@@ -407,9 +390,6 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             icon_panel->mtx.lock();
             log_info("l->curr_item) %i", l->curr_item);
             set_cmp_token(l->curr_item);
-            /* resort using custom comparision function */
-            //qsort(icon_panel->item_d.data(), icon_panel->item_d.size(), sizeof(item_t), struct_cmp_by_token);
-            // Sort using custom comparison function
             icon_panel->item_d.resize(icon_panel->item_c);
             std::sort(icon_panel->item_d.begin(), icon_panel->item_d.end(),
               [](const item_t& a, const item_t& b) {
@@ -417,15 +397,11 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                      log_error("a or b is empty");
                      return false;
                   }
-                  // Replace this condition with your custom comparison logic
                    return a.token_d[cmp_token].off.compare(b.token_d[cmp_token].off) < 0;
               });
 
-            // refresh Groups item_idx_t* array
             recreate_item_t(groups);
-            // switch focus, set back Games view
-            menu_pos.z = ON_MAIN_SCREEN;   // switch view
-            // reset selection to first entry
+            menu_pos.z = ON_MAIN_SCREEN;
             icon_panel->curr_item = 0;
             layout_update_sele(icon_panel, 0);
             active_p = icon_panel;
@@ -434,15 +410,12 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
 
         case 4: // on Filter_by page
         {
-            // update current label context
             switch (l->curr_item)
             {
-            case 0:  label = PV;      break;
+            case 0:  label = PV;     break;
             case 1:  label = AUTHOR;  break;
             }
-            // build_list of patterns found
             std::vector<item_idx_t> ret = build_item_list(icon_panel->item_d, label);
-            /* resort using custom comparision function */
             std::sort(ret.begin(), ret.end(), [](const item_idx_t& a, const item_idx_t& b) {
                      return b.len < a.len;
             });
@@ -450,37 +423,30 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             l->page_sel.x = 5,
                 l->item_c = ret.size();
             l->curr_item = 0;
-             // build_list of patterns found
             std::vector<item_idx_t> tmp_ret = build_item_list(icon_panel->item_d, label);
-            /* resort using custom comparision function */
             std::sort(tmp_ret.begin(), tmp_ret.end(), [](const item_idx_t& a, const item_idx_t& b) {
                      return b.len < a.len;
             });
             l->page_sel.x = 5,
             l->item_c = tmp_ret.size();
             l->curr_item = 0;
-            // build the char array for next call below
             std::vector<std::string> data;
             build_char_from_items(data, tmp_ret);
-            // point to this item_idx_t* AOS
             l->item_d[0].token_d = tmp_ret;
             layout_fill_item_from_list(l, data);
             layout_update_sele(l, 0);
             active_p = left_panel2;
-           // free(tmp);
-            // fixme: not finished, we are leaking tmp and ret !!!
         } break;
 
         case 5: // execute Filter_by selection
         {
-            // search for label and token_data
             snprintf(&pattern[0], 69, "%s", l->item_d[l->curr_item].token_d[0].off.c_str());
             goto search_by_label;
         }
 
         } // End switch
 
-        l->vbo_s = ASK_REFRESH; // ask to refresh VBO
+        l->vbo_s = ASK_REFRESH;
 
     refresh_active_panel:
 
@@ -493,15 +459,10 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
     }
     if (l == icon_panel) // go to download_panel
     {
-        // set to current selected
         l->curr_item = idx;
-        // but don't refresh indexes
 
     switch_to_download:
         loadmsg(getLangSTR(DL_CACHE));
-        //Check if Legacy is Enabled then check DL Counter for APP DL Page
-        //if(li->token_d) TID_VAILD
-        //CheckUpdate(l->item_d[l->curr_item].token_d[ ID ].off.c_str(), l->item_d[l->curr_item]);
         if (TID_VAILD)
         { 
             DL_CO = PENDING_DOWNLOADS;
@@ -521,14 +482,13 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 download_panel->item_d[0].token_d[0].off = download_panel_text[0] = getLangSTR(REINSTALL_APP);
         }
         else if (games[idx].update_status == APP_NOT_INSTALLED){
-                download_panel->item_d[0].token_d[0].off = download_panel_text[0] = set.auto_install.load() ? getLangSTR(DL_AND_IN) : getLangSTR(DL2);
+                download_panel_text[0] = set.auto_install.load() ? getLangSTR(DL_AND_IN) : getLangSTR(DL2);
         }
         icon_panel->mtx.unlock();
         goto refresh_active_panel;
     }
 
-    if (l == download_panel  // trigger item download
-        || l == option_panel) // execute action
+    if (l == download_panel || l == option_panel)
     {
         X_action_dispatch(l->f_sele, l);
         return;
@@ -540,12 +500,11 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
     if (l == left_panel2)
     {
         left_panel2->mtx.lock();
-        l->page_sel.x = 0; // back initial page
+        l->page_sel.x = 0;
         l->vbo_s = ASK_REFRESH;
-        l->item_c = 9;     // num of texts
+        l->item_c = 9;
         l->curr_item = 0;
 
-        // MISE À JOUR DYNAMIQUE DES COMPTEURS DE GROUPES ICI :
         for (int i = 0; i < 9; i++) {
             int count = 0;
             if (groups.size() > (i + 1)) {
@@ -559,67 +518,45 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
         layout_update_sele(l, 0);
         left_panel2->mtx.unlock();
     }
-    else
-        if (l == icon_panel)
+    else if (l == icon_panel)
+    {
+        log_info("layout_dispatch_O: icon_panel");
+        menu_pos.z = ON_LEFT_PANEL;
+        l->curr_item = 0;
+
+    drop_aux:
+
+        if (!aux.empty())
         {
-            log_info("layout_dispatch_O: icon_panel");
-            menu_pos.z = ON_LEFT_PANEL;
-            l->curr_item = 0;
-
-        drop_aux:
-
-            if (!aux.empty()) // drop aux
-            {
-                l->item_c = games[0].token_c;
-                l->item_d.clear();
-                l->item_d = games;
-                l->item_d.resize(l->item_c);
-
-                //l->item_d = games;
-                log_info("dropping aux %i", l->item_c);
-               // std::copy(games.begin() + 1, games.end() , l->item_d.begin());
-                //std::copy(icon_panel->item_d.begin(), icon_panel->item_d.begin() + icon_panel->item_c, games.begin() + 1);
-     /*           int count = 0;
-                for (item_t num : icon_panel->item_d) {
-        if (!num.token_d.empty() && ID >= 0 && ID < num.token_d.size()) { // Check if num.token_d is not empty and ID is within the valid range
-            //std::cout << num.token_d[ID].off << " ";
-            log_info("game: %s %i %i", num.token_d[ID].off.c_str(), count, icon_panel->item_d.size()) ;
-        } else {
-            log_info("Invalid num.token_d or ID out of range");
+            l->item_c = games[0].token_c;
+            l->item_d.clear();
+            l->item_d = games;
+            l->item_d.resize(l->item_c);
+            log_info("dropping aux %i", l->item_c);
+            aux.clear();
         }
-        count++;
+        layout_update_sele(l, 0);
+        active_p = left_panel2;
     }
-    log_info("ddddd aux %i", l->item_c);*/
-                aux.clear();
-            }
-            log_info("layout_dispatch_O: layout_update_sele is icon_panel %s", l == icon_panel ? "true" : "false");
-            layout_update_sele(l, 0);
-            active_p = left_panel2;    // back to Left panel
-        }
-        else
-            if (l == queue_panel
-                || l == option_panel)
-            {
-                menu_pos.z = ON_LEFT_PANEL;
-                active_p = left_panel2; // back to Left panel
-                active_p->page_sel.x = 0;
-            }
-            else
-                if ( l == download_panel)
-                {
-                    menu_pos.z = ON_MAIN_SCREEN;
-                    l = active_p = icon_panel; // back to Icon panel
-                    active_p->vbo_s = ASK_REFRESH;
-                    left_panel2->vbo_s = ASK_REFRESH;
-
-                    goto drop_aux;
-                }
+    else if (l == queue_panel || l == option_panel)
+    {
+        menu_pos.z = ON_LEFT_PANEL;
+        active_p = left_panel2;
+        active_p->page_sel.x = 0;
+    }
+    else if ( l == download_panel)
+    {
+        menu_pos.z = ON_MAIN_SCREEN;
+        l = active_p = icon_panel;
+        active_p->vbo_s = ASK_REFRESH;
+        left_panel2->vbo_s = ASK_REFRESH;
+        goto drop_aux;
+    }
 }
 
 /* deal with menu position / actions */
 void GLES2_scene_on_pressed_button(int button)
 {
-
     if (!active_p)
          active_p = left_panel2;
 
@@ -627,49 +564,28 @@ void GLES2_scene_on_pressed_button(int button)
 
     auto &l = active_p;
 
-    //  log_debug( "%s, l:%p", __FUNCTION__, l);
-
     switch (button)
     {
-    case LEF:  layout_update_sele(l, -1); break; // l_or_r
+    case LEF:  layout_update_sele(l, -1); break;
     case RIG:  layout_update_sele(l, +1); break;
-    case UP:  layout_update_sele(l, -l->fieldsize.x); break;
+    case UP:   layout_update_sele(l, -l->fieldsize.x); break;
     case DOW:  layout_update_sele(l, +l->fieldsize.x); break;
-
-    case TRI: { /* go cf */
-        //menu_pos.z = ON_ITEMzFLOW;  active_p = NULL;
-        //drop_all_icons();
-    } break;
-
-    case CIR: { // back
-        layout_dispatch_O(l);
-    } break;
-
-    case CRO: { // execute action
-        layout_dispatch_X(l);
-    } break;
-
-        // we don't catch button for migration, fallbak old way
+    case TRI:  break;
+    case CIR:  layout_dispatch_O(l); break;
+    case CRO:  layout_dispatch_X(l); break;
     default: return;
     }
 
     log_debug("%s, %d/%d", __FUNCTION__, l->curr_item + 1, l->item_c);
-
     GLES2_refresh_common();
 }
-
 
 void GLES2_Refresh_for_settings()
 {
-
     left_panel2->mtx.lock();
     if (!active_p) active_p = left_panel2;
-
     GLES2_refresh_sysinfo();
-
     layout_update_sele(active_p, 0);
-
     GLES2_refresh_common();
     left_panel2->mtx.unlock();
 }
-
