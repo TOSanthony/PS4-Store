@@ -24,9 +24,14 @@ int DL_CO = -999;
 unsigned char cmp_token = 0,
 sort_patterns[11] = { 0, 1, 4, 5, 9, 10, 11, 12, 13, 16, 16 };
 
+// Variables de suivi pour le retour et la pagination
+bool came_from_queue = false;
+int saved_page_x = 0;
+int saved_f_sele = 0;
+
 /* set comparison token */
 void set_cmp_token(const int index)
-{    //cmp_token = index;
+{
     cmp_token = sort_patterns[index];
 }
 
@@ -214,6 +219,12 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
         }
         case ON_QUEUE:    req_status = RUNNING;    break;
         }
+        
+        // --- ON INDIQUE QU'ON VIENT DE LA FILE D'ATTENTE ---
+        came_from_queue = true;
+        menu_pos.z = ON_QUEUE; 
+        // --------------------------------------------------
+
         // get index from selected thread info
         idx = thread_find_by_status(l->f_sele, req_status);
         if (menu_pos.z == ON_QUEUE && idx == -1)
@@ -307,7 +318,7 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 l->is_active =
                     l->is_shown = 1;
                 // reset selection to first entry
-                //l->item_sel   = (ivec2) (0);
+                //l->item_sel    = (ivec2) (0);
                 layout_update_fsize(l);
                 active_p = queue_panel;  //active_p->is_shown = 1;
                 break;
@@ -472,7 +483,7 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             // update current label context
             switch (l->curr_item)
             {
-            case 0:  label = PV;      break;
+            case 0:  label = PV;     break;
             case 1:  label = AUTHOR;  break;
             }
             // build_list of patterns found
@@ -528,6 +539,11 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
     }
     if (l == icon_panel) // go to download_panel
     {
+        // --- SAUVEGARDE DE LA PAGE ET DE LA SÉLECTION LOCALE ---
+        saved_page_x = l->page_sel.x;
+        saved_f_sele = l->f_sele;
+        // -------------------------------------------------------
+
         // set to current selected
         l->curr_item = idx;
         // but don't refresh indexes
@@ -545,6 +561,7 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             }
         }
 
+        came_from_queue = false;
         menu_pos.z = ON_ITEM_INFO;
         active_p = download_panel;  active_p->is_shown = 1;
         GLES2_refresh_sysinfo();
@@ -577,68 +594,67 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
         left_panel2->mtx.lock();
         l->page_sel.x = 0, // back initial page
             l->vbo_s = ASK_REFRESH;
-        l->item_c = 7, // num of texts
+        l->item_c = 7, // num_of texts
             l->curr_item = 0;
             log_info("layout_dispatch_O %i", l->item_c);
         layout_fill_item_from_list(l, new_panel_text[l->page_sel.x]);
         layout_update_sele(l, 0);
         left_panel2->mtx.unlock();
     }
-    else
-        if (l == icon_panel)
+    else if (l == icon_panel)
+    {
+        log_info("layout_dispatch_O: icon_panel");
+        menu_pos.z = ON_LEFT_PANEL;
+        l->curr_item = 0;
+
+    drop_aux:
+
+        if (!aux.empty()) // drop aux
         {
-            log_info("layout_dispatch_O: icon_panel");
-            menu_pos.z = ON_LEFT_PANEL;
-            l->curr_item = 0;
+            l->item_c = games[0].token_c;
+            l->item_d.clear();
+            l->item_d = games;
+            l->item_d.resize(l->item_c);
 
-        drop_aux:
-
-            if (!aux.empty()) // drop aux
-            {
-                l->item_c = games[0].token_c;
-                l->item_d.clear();
-                l->item_d = games;
-                l->item_d.resize(l->item_c);
-
-                //l->item_d = games;
-                log_info("dropping aux %i", l->item_c);
-               // std::copy(games.begin() + 1, games.end() , l->item_d.begin());
-                //std::copy(icon_panel->item_d.begin(), icon_panel->item_d.begin() + icon_panel->item_c, games.begin() + 1);
-     /*           int count = 0;
-                for (item_t num : icon_panel->item_d) {
-        if (!num.token_d.empty() && ID >= 0 && ID < num.token_d.size()) { // Check if num.token_d is not empty and ID is within the valid range
-            //std::cout << num.token_d[ID].off << " ";
-            log_info("game: %s %i %i", num.token_d[ID].off.c_str(), count, icon_panel->item_d.size()) ;
-        } else {
-            log_info("Invalid num.token_d or ID out of range");
+            log_info("dropping aux %i", l->item_c);
+            aux.clear();
         }
-        count++;
+        log_info("layout_dispatch_O: layout_update_sele is icon_panel %s", l == icon_panel ? "true" : "false");
+        layout_update_sele(l, 0);
+        active_p = left_panel2;    // back to Left panel
     }
-    log_info("ddddd aux %i", l->item_c);*/
-                aux.clear();
-            }
-            log_info("layout_dispatch_O: layout_update_sele is icon_panel %s", l == icon_panel ? "true" : "false");
-            layout_update_sele(l, 0);
-            active_p = left_panel2;    // back to Left panel
+    else if (l == queue_panel || l == option_panel)
+    {
+        menu_pos.z = ON_LEFT_PANEL;
+        active_p = left_panel2; // back to Left panel
+        active_p->page_sel.x = 0;
+    }
+    else if (l == download_panel)
+    {
+        if (came_from_queue)
+        {
+            came_from_queue = false;
+            menu_pos.z = ON_QUEUE;
+            queue_panel->is_shown = 1;
+            icon_panel->is_shown = 0;
+            l = active_p = queue_panel;
+            queue_panel->vbo_s = ASK_REFRESH;
+            layout_update_sele(queue_panel, 0);
+            return;
         }
-        else
-            if (l == queue_panel
-                || l == option_panel)
-            {
-                menu_pos.z = ON_LEFT_PANEL;
-                active_p = left_panel2; // back to Left panel
-                active_p->page_sel.x = 0;
-            }
-            else
-                if ( l == download_panel)
-                {
-                    menu_pos.z = ON_MAIN_SCREEN;
-                    l = active_p = icon_panel; // back to Icon panel
-                    active_p->vbo_s = ASK_REFRESH;
-                    left_panel2->vbo_s = ASK_REFRESH;
 
-                    goto drop_aux;
-                }
+        menu_pos.z = ON_MAIN_SCREEN;
+        l = active_p = icon_panel; // back to Icon panel
+        icon_panel->is_shown = 1;
+        active_p->vbo_s = ASK_REFRESH;
+        left_panel2->vbo_s = ASK_REFRESH;
+
+        // --- RESTAURATION DE LA PAGE ET DE LA SÉLECTION LOCALE ---
+        icon_panel->page_sel.x = saved_page_x;
+        icon_panel->f_sele = saved_f_sele;
+        layout_update_sele(icon_panel, 0);
+        // ---------------------------------------------------------
+    }
 }
 
 /* deal with menu position / actions */
@@ -697,4 +713,3 @@ void GLES2_Refresh_for_settings()
     GLES2_refresh_common();
     left_panel2->mtx.unlock();
 }
-
