@@ -193,8 +193,7 @@ extern std::atomic_bool show_prog;
 static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
 {
     bool TID_VAILD = false;
-    char tmp[256],
-        pattern[70];
+    char tmp[256];
     // default indexing
     int idx = l->curr_item;
     std::string pattern_str;
