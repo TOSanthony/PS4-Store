@@ -182,43 +182,114 @@ static void layout_compose_text(std::shared_ptr<layout_t> &l, int idx, vec2 &pen
                 if (save_text)
                    selected_text = tmp;
 
-                if(l->page_sel.x == 0) // on main page
+                if(l->page_sel.x == 0) // menu principal personnalisé
                 {
-                    /* draw Installed_Apps, Groups, Ready_to_install, Queue total count numbers */
-                    int ret        = 0,
-                        req_status = 0;
-                    // one item label per line
-                    switch( idx )
+                    /*
+                        Menu gauche :
+
+                        0  - Game
+                        1  - Patch
+                        2  - DLC
+                        3  - Theme
+                        4  - App
+                        5  - Unknown
+                        6  - Other
+                        7  - Ready to install
+                        8  - Queue
+                        9  - Updates
+                        10 - Settings
+                    */
+
+                    int ret = 0;
+                    int req_status = 0;
+
+                    switch(idx)
                     {
-                        case 1:  ret =   number_of_iapps(APP_PATH("../"));  break; // Installed_Apps has first reserved
-                        case 0:  ret =   games[0].token_c;  break; 
-                        case 2:  ret =  groups[0].token_c;  break; // Groups
-                        case 3: { 
-                            if (set.auto_install.load())
-                               req_status = INSTALLING_APP;
+                        /*
+                            Store Groups.
+
+                            groups[0] contient le total général.
+                            Les groupes commencent donc à groups[1].
+                        */
+                        case 0: // Game
+                        case 1: // Patch
+                        case 2: // DLC
+                        case 3: // Theme
+                        case 4: // App
+                        case 5: // Unknown
+                        case 6: // Other
+                        {
+                            const int group_index = idx + 1;
+
+                            if(group_index < static_cast<int>(groups.size()))
+                            {
+                                ret = groups[group_index].token_c;
+                            }
+
+                            break;
+                        }
+
+                        case 7: // Ready to install
+                        {
+                            if(set.auto_install.load())
+                                req_status = INSTALLING_APP;
                             else
                                 req_status = COMPLETED;
 
                             break;
                         }
-                        case 4:  req_status = RUNNING;  break; // Queue
-                        case 5:  ret = updates_counter.load();  break; // Updates
-                    }
-                    // if requested, count threads
-                    if(req_status) {
-                        ret = thread_count_by_status( req_status );
-                        if(idx == 4)
-                            ret += thread_count_by_status( PAUSED );
+
+                        case 8: // Queue
+                        {
+                            req_status = RUNNING;
+                            break;
+                        }
+
+                        case 9: // Updates
+                        {
+                            ret = updates_counter.load();
+                            break;
+                        }
+
+                        case 10: // Settings
+                        {
+                            // Settings n'a pas de compteur
+                            break;
+                        }
+
+                        default:
+                            break;
                     }
 
-                    if(ret > 0) // we counted at least one
+                    /*
+                        Compteurs dynamiques :
+                        - Ready to install
+                        - Queue
+                    */
+                    if(req_status)
                     {
-                        //add_text( l->vbo, sub_font, tmp.c_str(), &col, &pen);
+                        ret = thread_count_by_status(req_status);
+
+                        if(idx == 8) // Queue
+                        {
+                            ret += thread_count_by_status(PAUSED);
+                        }
+                    }
+
+                    /*
+                        Affichage du nombre à droite du nom.
+                    */
+                    if(ret > 0)
+                    {
+                        // Afficher le nom de l'élément
                         l->vbo.add_text(sub_font, tmp, col, pen);
-                       // snprintf(&tmp[0], 63, "%d", ret);
-                        //log_info("ret: %d pen.x %.f pen.x %.f", ret, pen.x, pen.y);
+
+                        // Préparer le compteur
                         tmp = std::to_string(ret);
-                        texture_font_load_glyphs( sub_font, tmp.c_str() );
+
+                        texture_font_load_glyphs(sub_font, tmp.c_str());
+
+                        // Positionner le compteur à droite
                         pen.x = 460 - tl;
                     }
                 }
@@ -832,4 +903,3 @@ void layout_refresh_VBOs(void)
         GLES2_UpdateVboForLayout(l);
     }
 }
-
