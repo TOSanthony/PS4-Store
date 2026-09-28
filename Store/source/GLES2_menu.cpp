@@ -19,7 +19,6 @@ extern bool unsafe_source;
 extern std::shared_ptr<layout_t>  left_panel2; // for migration
 extern vec2 resolution;
 extern std::vector<std::string> download_panel_text;
-extern std::vector<std::string> group_label; // <-- Ajoute cette ligne
 
 typedef struct {
     float x, y, z;    // position (3f)
@@ -52,7 +51,7 @@ void GLES2_render_paged_list(int unused)
 {
     std::shared_ptr<layout_t>  &l = left_panel2;
     std::vector<vec4> rr;
-    //vec4 r = (vec4) { -.985, -.100,   -.505, -.105 };
+    vec4 r = (vec4) { -.985, -.100,   -.505, -.105 };
 
     if(!l.get() || l->item_d.empty() )
     {   // count is known in advance!
@@ -63,23 +62,8 @@ void GLES2_render_paged_list(int unused)
         l->fieldsize = (ivec2){ 1, 10 };
         // create the first screen we will show
         l->item_c    = l->fieldsize.x * l->fieldsize.y;
-
-
-        for (int i = 0; i < 7; i++) {
-            int count = 0;
-            if (groups.size() > (i + 1)) {
-                count = groups[i + 1].token_c;
-            }
-            // Utilisation du format natif "Nom du groupe (Quantité)"
-            new_panel_text[0][i] = fmt::format("{} ({})", group_label[i], count);
-        }
-        
         int res = layout_fill_item_from_list(l, new_panel_text[0]);
-
-
-
-
-        
+//      log_info("%s: %d", __FUNCTION__, res);
         // reset count to current list
         l->item_c = res;
         // reduce field_size in case
@@ -89,12 +73,12 @@ void GLES2_render_paged_list(int unused)
         l->is_shown = 1;
        log_info("%s: %p %p %p", __FUNCTION__, left_panel2.get(), active_p.get(), l.get());
     }
-    /*if(active_p == left_panel2 &&  l->page_sel.x == ON_MAIN_SCREEN){
+    if(active_p == left_panel2 &&  l->page_sel.x == ON_MAIN_SCREEN){
     rr.push_back(r);
     ORBIS_RenderFillRects(USE_COLOR, grey, rr, 1);
     GLES2_DrawFillingRect(rr, white, updates_prog.load());
     rr.clear();
-    }*/
+    }
 
    if(1)
       GLES2_render_layout_v2(l, 0);
