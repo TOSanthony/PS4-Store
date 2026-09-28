@@ -259,22 +259,8 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
         {
         case 0: // first page - Menu principal personnalisé
         {
-            // Menu :
-            // 0  - Game
-            // 1  - Patch
-            // 2  - DLC
-            // 3  - Theme
-            // 4  - App
-            // 5  - Unknown
-            // 6  - Other
-            // 7  - Ready to install
-            // 8  - Queue
-            // 9  - Updates
-            // 10 - Settings
-
             if (l->curr_item >= 0 && l->curr_item <= 6) {
                 // Store Groups (indices 0-6)
-                // set left_panel 2nd page pour afficher le groupe sélectionné
                 l->page_sel.x = 2;
                 l->item_c = groups[l->curr_item + 1].token_c;
                 l->curr_item = 0;
@@ -283,13 +269,28 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 break;
             }
 
-            if (l->curr_item == 7) {
+            // Détermination dynamique des index selon auto_install
+            int rinstall_idx = -1;
+            int queue_idx = 7;
+            int updates_idx = 8;
+            int settings_idx = 9;
+
+            if (!set.auto_install.load()) {
+                // Si auto_install est OFF, RINSTALL est présent à l'index 7
+                rinstall_idx = 7;
+                queue_idx = 8;
+                updates_idx = 9;
+                settings_idx = 10;
+            } else {
+                // Si auto_install est ON, pas de RINSTALL, Queue passe à 7
+                queue_idx = 7;
+                updates_idx = 8;
+                settings_idx = 9;
+            }
+
+            if (rinstall_idx != -1 && l->curr_item == rinstall_idx) {
                 // Ready to install
-                if (set.auto_install.load())
-                    menu_pos.z = ON_INSTALL;
-                else
-                    menu_pos.z = ON_INSTALL;
-                
+                menu_pos.z = ON_INSTALL;
                 queue_panel_init();
                 l = queue_panel;
                 l->is_active = l->is_shown = 1;
@@ -298,7 +299,7 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 break;
             }
 
-            if (l->curr_item == 8) {
+            if (l->curr_item == queue_idx) {
                 // Queue
                 menu_pos.z = ON_QUEUE;
                 queue_panel_init();
@@ -309,23 +310,23 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 break;
             }
 
-            if (l->curr_item == 9) {
+            if (l->curr_item == updates_idx) {
                 // Updates
                 if(!unsafe_source){
                     if(update_check_finised){
-                       Update_View(l);
+                        Update_View(l);
                     }
                     else{
-                          left_panel2->mtx.unlock();
-                           #ifdef __ORBIS__
-                          if(options_dialog(getLangSTR(UPDATES_STILL_LOADING), getLangSTR(SHOW_PROG), getLangSTR(STAY_IN_BACKGROUND)) == 1){
+                        left_panel2->mtx.unlock();
+                         #ifdef __ORBIS__
+                        if(options_dialog(getLangSTR(UPDATES_STILL_LOADING), getLangSTR(SHOW_PROG), getLangSTR(STAY_IN_BACKGROUND)) == 1){
                             progstart(getLangSTR(CHECKING_FOR_UPDATES));
                             show_prog = true;
                             while(show_prog.load()){
                                 usleep(100000);
                             }
-                          }
-                          #endif
+                        }
+                        #endif
                     }
                  }
                  else{
@@ -337,10 +338,12 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 break;
             }
 
-            if (l->curr_item == 10) {
+            if (l->curr_item == settings_idx) {
                 // Settings
                 menu_pos.z = ON_SETTINGS;
                 active_p = option_panel;
+                active_p->is_shown = 1;
+                break;
             }
             
             active_p->is_shown = 1;
