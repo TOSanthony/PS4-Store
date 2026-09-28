@@ -262,65 +262,65 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
         left_panel2->mtx.lock();
         switch (l->page_sel.x)
         {
-        case 0: // first page
+        case 0: // first page - Menu principal personnalisé
         {
-            if (l->curr_item == 0) {
-                menu_pos.z = ON_MAIN_SCREEN;
-                // set left_panel 2nd page
-                l->page_sel.x = 1,
-                    l->item_c = 3,
-                    l->curr_item = 0;
-                layout_fill_item_from_list(l, new_panel_text[l->page_sel.x]);
-                layout_update_sele(l, 0);
-                active_p = icon_panel;
-                break;
-            }
+            // Menu :
+            // 0  - Game
+            // 1  - Patch
+            // 2  - DLC
+            // 3  - Theme
+            // 4  - App
+            // 5  - Unknown
+            // 6  - Other
+            // 7  - Ready to install
+            // 8  - Queue
+            // 9  - Updates
+            // 10 - Settings
 
-            if (l->curr_item == 1) {
-                menu_pos.z = ON_MAIN_SCREEN;
-                Install_View(l, "Itemzflow", NAME);
-                break;
-            }
-
-            // 2 Groups
-            if (l->curr_item == 2) {
-                // set left_panel 3nd page
-                l->page_sel.x = 2,
-                l->item_c = groups[0].token_c;
+            if (l->curr_item >= 0 && l->curr_item <= 6) {
+                // Store Groups (indices 0-6)
+                // set left_panel 2nd page pour afficher le groupe sélectionné
+                l->page_sel.x = 2;
+                l->item_c = groups[l->curr_item + 1].token_c;
                 l->curr_item = 0;
                 layout_update_sele(l, 0);
                 active_p = left_panel2;
                 break;
             }
 
-            // variable length lists
-            if (l->curr_item == 3
-                || l->curr_item == 4)
-            {
-                if (l->f_sele == 3) menu_pos.z = ON_INSTALL;
+            if (l->curr_item == 7) {
+                // Ready to install
+                if (set.auto_install.load())
+                    menu_pos.z = ON_INSTALL;
                 else
-                    if (l->f_sele == 4) menu_pos.z = ON_QUEUE;
-                // activate and set focus
+                    menu_pos.z = ON_INSTALL;
+                
                 queue_panel_init();
-                l = queue_panel; // switch control
-               // l->page_sel.x = 0;
-                l->is_active =
-                    l->is_shown = 1;
-                // reset selection to first entry
-                //l->item_sel   = (ivec2) (0);
+                l = queue_panel;
+                l->is_active = l->is_shown = 1;
                 layout_update_fsize(l);
-                active_p = queue_panel;  //active_p->is_shown = 1;
+                active_p = queue_panel;
                 break;
             }
 
-            // 5 Updates (todo)
-            if (l->curr_item == 5) {
-                 if(!unsafe_source){
+            if (l->curr_item == 8) {
+                // Queue
+                menu_pos.z = ON_QUEUE;
+                queue_panel_init();
+                l = queue_panel;
+                l->is_active = l->is_shown = 1;
+                layout_update_fsize(l);
+                active_p = queue_panel;
+                break;
+            }
+
+            if (l->curr_item == 9) {
+                // Updates
+                if(!unsafe_source){
                     if(update_check_finised){
                        Update_View(l);
                     }
                     else{
-                          //msgok(WARNING, "Please wait for the update check to finish");
                           left_panel2->mtx.unlock();
                            #ifdef __ORBIS__
                           if(options_dialog(getLangSTR(UPDATES_STILL_LOADING), getLangSTR(SHOW_PROG), getLangSTR(STAY_IN_BACKGROUND)) == 1){
@@ -328,7 +328,6 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                             show_prog = true;
                             while(show_prog.load()){
                                 usleep(100000);
-
                             }
                           }
                           #endif
@@ -343,175 +342,40 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 break;
             }
 
-            if (l->curr_item == 6) {
+            if (l->curr_item == 10) {
+                // Settings
                 menu_pos.z = ON_SETTINGS;
-                active_p = option_panel;  //active_p->is_shown = 1;
+                active_p = option_panel;
             }
-            // set status
+            
             active_p->is_shown = 1;
         } 
         break;
 
-        case 1: // on Games page
-        {
-            if (l->curr_item == 0)  /* Search for */
-            {
-                memset(&pattern[0], 0, sizeof(pattern));
-                log_info("execute openDialogForSearch()");
-                // get char *pattern
-                if(!Keyboard("Store Keyboard", "", &pattern[0], false)) goto cancel_kb_search;
-
-                log_info("@@@@@@@@@  Search for: %s", pattern);
-                loadmsg(getLangSTR(SEARCHING));
-                label = NAME;
-
-            search_by_label:
-                destroy_item_t(q);
-                // build an array of search results
-                pattern_str = pattern;
-                log_info("Searching for '%s' ...", pattern_str.c_str());
-                q = search_item_t(icon_panel->item_d,
-                    label, pattern_str);
-                aux = q;
-
-            wen_found_hit:
-
-                if (!aux.empty() && aux[0].len) // we got results, address aux!
-                {
-                    log_info("Showing %d items for '%s' @ %p", aux[0].len, aux[0].off.c_str(), &aux);
-                    //  for(int i = 0; i < aux[0].len; i++) { log_info("%d: %s %d", i, aux[i].off, aux[i].len); }
-                    // switch focus
-                    menu_pos.z = ON_MAIN_SCREEN;
-                    l = active_p = icon_panel;
-                    // reset selection to first entry
-                    l->curr_item = 0;
-                    l->item_c = aux[0].len;
-                    layout_update_sele(l, 0);
-                    // but now we have aux array!
-                }
-                else
-                {
-
-                    #ifdef __ORBIS__
-                    sceKernelIccSetBuzzer(3);
-                    #endif
-                }
-                cancel_kb_search:
-                log_info("Cancelling search");
-                #ifdef __ORBIS__
-                sceMsgDialogTerminate();
-                #endif
-            }
-
-            if (l->curr_item == 1)  /* switch to Sort labels */
-            {   // set left_panel 4th page
-                l->page_sel.x = 3,
-                    l->item_c = 11;
-                active_p = left_panel2;
-
-                goto switch_page;
-            }
-            // filter
-            if (l->curr_item == 2)  /* switch to Filter_by */
-            {   // set left_panel 5th page
-                l->page_sel.x = 4,
-                    l->item_c = 2;
-                active_p = left_panel2;
-            switch_page:
-                l->curr_item = 0;
-                layout_fill_item_from_list(l, new_panel_text[l->page_sel.x]);
-
-                layout_update_sele(l, 0);
-
-                goto refresh_active_panel;
-            }
-
-        } break;
-
         case 2: // on Groups page
         {
-            // map aux AOS to selected group
+            // Afficher les jeux du groupe sélectionné
             aux = groups[l->curr_item + 1].token_d;
             aux[0].len = groups[l->curr_item + 1].token_c;
 
-            goto wen_found_hit;
-        } break;
-
-        case 3: // on Sort_by page
-        {
-            icon_panel->mtx.lock();
-            log_info("l->curr_item) %i", l->curr_item);
-            set_cmp_token(l->curr_item);
-            /* resort using custom comparision function */
-            //qsort(icon_panel->item_d.data(), icon_panel->item_d.size(), sizeof(item_t), struct_cmp_by_token);
-            // Sort using custom comparison function
-            icon_panel->item_d.resize(icon_panel->item_c);
-            std::sort(icon_panel->item_d.begin(), icon_panel->item_d.end(),
-              [](const item_t& a, const item_t& b) {
-                  if(a.token_d.empty() || b.token_d.empty()) {
-                     log_error("a or b is empty");
-                     return false;
-                  }
-                  // Replace this condition with your custom comparison logic
-                   return a.token_d[cmp_token].off.compare(b.token_d[cmp_token].off) < 0;
-              });
-
-            // refresh Groups item_idx_t* array
-            recreate_item_t(groups);
-            // switch focus, set back Games view
-            menu_pos.z = ON_MAIN_SCREEN;   // switch view
-            // reset selection to first entry
-            icon_panel->curr_item = 0;
-            layout_update_sele(icon_panel, 0);
-            active_p = icon_panel;
-            icon_panel->mtx.unlock();
-        } break;
-
-        case 4: // on Filter_by page
-        {
-            // update current label context
-            switch (l->curr_item)
+            if (!aux.empty() && aux[0].len)
             {
-            case 0:  label = PV;      break;
-            case 1:  label = AUTHOR;  break;
+                log_info("Showing %d items for group '%s' @ %p", aux[0].len, aux[0].off.c_str(), &aux);
+                menu_pos.z = ON_MAIN_SCREEN;
+                l = active_p = icon_panel;
+                l->curr_item = 0;
+                l->item_c = aux[0].len;
+                layout_update_sele(l, 0);
             }
-            // build_list of patterns found
-            std::vector<item_idx_t> ret = build_item_list(icon_panel->item_d, label);
-            /* resort using custom comparision function */
-            std::sort(ret.begin(), ret.end(), [](const item_idx_t& a, const item_idx_t& b) {
-                     return b.len < a.len;
-            });
-
-            l->page_sel.x = 5,
-                l->item_c = ret.size();
-            l->curr_item = 0;
-             // build_list of patterns found
-            std::vector<item_idx_t> tmp_ret = build_item_list(icon_panel->item_d, label);
-            /* resort using custom comparision function */
-            std::sort(tmp_ret.begin(), tmp_ret.end(), [](const item_idx_t& a, const item_idx_t& b) {
-                     return b.len < a.len;
-            });
-            l->page_sel.x = 5,
-            l->item_c = tmp_ret.size();
-            l->curr_item = 0;
-            // build the char array for next call below
-            std::vector<std::string> data;
-            build_char_from_items(data, tmp_ret);
-            // point to this item_idx_t* AOS
-            l->item_d[0].token_d = tmp_ret;
-            layout_fill_item_from_list(l, data);
-            layout_update_sele(l, 0);
-            active_p = left_panel2;
-           // free(tmp);
-            // fixme: not finished, we are leaking tmp and ret !!!
-        } break;
-
-        case 5: // execute Filter_by selection
-        {
-            // search for label and token_data
-            snprintf(&pattern[0], 69, "%s", l->item_d[l->curr_item].token_d[0].off.c_str());
-            goto search_by_label;
-        }
+            else
+            {
+                #ifdef __ORBIS__
+                sceKernelIccSetBuzzer(3);
+                #endif
+            }
+            break;
+        } 
+        break;
 
         } // End switch
 
@@ -575,13 +439,17 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
     if (l == left_panel2)
     {
         left_panel2->mtx.lock();
-        l->page_sel.x = 0, // back initial page
+        
+        // Revenir à la page 0 du menu principal
+        if (l->page_sel.x != 0) {
+            l->page_sel.x = 0;
             l->vbo_s = ASK_REFRESH;
-        l->item_c = 7, // num of texts
+            l->item_c = 11; // 11 éléments dans le menu principal
             l->curr_item = 0;
-            log_info("layout_dispatch_O %i", l->item_c);
-        layout_fill_item_from_list(l, new_panel_text[l->page_sel.x]);
-        layout_update_sele(l, 0);
+            log_info("layout_dispatch_O: retour au menu principal avec %i éléments", l->item_c);
+            layout_update_sele(l, 0);
+        }
+        
         left_panel2->mtx.unlock();
     }
     else
@@ -600,21 +468,7 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
                 l->item_d = games;
                 l->item_d.resize(l->item_c);
 
-                //l->item_d = games;
                 log_info("dropping aux %i", l->item_c);
-               // std::copy(games.begin() + 1, games.end() , l->item_d.begin());
-                //std::copy(icon_panel->item_d.begin(), icon_panel->item_d.begin() + icon_panel->item_c, games.begin() + 1);
-     /*           int count = 0;
-                for (item_t num : icon_panel->item_d) {
-        if (!num.token_d.empty() && ID >= 0 && ID < num.token_d.size()) { // Check if num.token_d is not empty and ID is within the valid range
-            //std::cout << num.token_d[ID].off << " ";
-            log_info("game: %s %i %i", num.token_d[ID].off.c_str(), count, icon_panel->item_d.size()) ;
-        } else {
-            log_info("Invalid num.token_d or ID out of range");
-        }
-        count++;
-    }
-    log_info("ddddd aux %i", l->item_c);*/
                 aux.clear();
             }
             log_info("layout_dispatch_O: layout_update_sele is icon_panel %s", l == icon_panel ? "true" : "false");
@@ -697,4 +551,3 @@ void GLES2_Refresh_for_settings()
     GLES2_refresh_common();
     left_panel2->mtx.unlock();
 }
-
