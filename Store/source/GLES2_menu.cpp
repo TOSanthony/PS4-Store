@@ -73,12 +73,14 @@ void GLES2_render_paged_list(int unused)
         l->is_shown = 1;
        log_info("%s: %p %p %p", __FUNCTION__, left_panel2.get(), active_p.get(), l.get());
     }
+    /*
     if(active_p == left_panel2 &&  l->page_sel.x == ON_MAIN_SCREEN){
     rr.push_back(r);
     ORBIS_RenderFillRects(USE_COLOR, grey, rr, 1);
     GLES2_DrawFillingRect(rr, white, updates_prog.load());
     rr.clear();
     }
+    */
 
    if(1)
       GLES2_render_layout_v2(l, 0);
