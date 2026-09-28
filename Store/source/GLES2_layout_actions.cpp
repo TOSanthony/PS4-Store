@@ -546,7 +546,7 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
         l->curr_item = 0;
 
         // MISE À JOUR DYNAMIQUE DES COMPTEURS DE GROUPES ICI :
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 9; i++) {
             int count = 0;
             if (groups.size() > (i + 1)) {
                 count = groups[i + 1].token_c;
