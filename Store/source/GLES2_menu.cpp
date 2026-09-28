@@ -54,53 +54,53 @@ void GLES2_render_paged_list(int unused)
     vec4 r = (vec4) { -.985, -.100,   -.505, -.105 };
 
     if(!l.get() || l->item_d.empty() )
-    {   // count is known in advance!
-        int count = 64;//200;
-        // dynalloc and init this panel
+    {   
+        int count = 64;
         l = GLES2_layout_init( count );
         l->bound_box =  (vec4){ 0, 900,   500, 700 };
         l->fieldsize = (ivec2){ 1, 10 };
-        // create the first screen we will show
         l->item_c    = l->fieldsize.x * l->fieldsize.y;
         
-        // MODIFIÉ: Menu combiné - Contenu de Store Groups + options supplémentaires
         std::vector<std::string> combined_menu;
-        // Contenu de Store Groups (7 catégories)
-        combined_menu.push_back("Game");              // case 0
-        combined_menu.push_back("Patch");             // case 1
-        combined_menu.push_back("DLC");               // case 2
-        combined_menu.push_back("Theme");             // case 3
-        combined_menu.push_back("App");               // case 4
-        combined_menu.push_back("Unknown");           // case 5
-        combined_menu.push_back("Other");             // case 6
-        // Options supplémentaires
-        combined_menu.push_back(getLangSTR(RINSTALL));    // Ready to install (case 7)
-        combined_menu.push_back(getLangSTR(QUEUE));       // Queue (case 8)
-        combined_menu.push_back(getLangSTR(UPDATES));     // Updates (case 9)
-        combined_menu.push_back(getLangSTR(SETTINGS));    // Settings (case 10)
+
+        // 1. Récupération dynamique des 7 groupes avec leurs compteurs réels
+        for (int i = 0; i < 7; i++) {
+            int group_count = 0;
+            if (groups.size() > (i + 1)) {
+                group_count = groups[i + 1].token_c;
+            }
+            // Utilisation du libellé de groupe avec sa quantité entre parenthèses
+            std::string label = (group_label.size() > i && !group_label[i].empty()) ? group_label[i] : "Group";
+            combined_menu.push_back(fmt::format("{} ({})", label, group_count));
+        }
+
+        // 2. Options supplémentaires dynamiques selon auto_install
+        if (!set.auto_install.load()) {
+            combined_menu.push_back(getLangSTR(RINSTALL)); // Ready to install (index 7 si auto_install OFF)
+        }
+        combined_menu.push_back(getLangSTR(QUEUE));      // Queue (index 7 ou 8)
+        combined_menu.push_back(getLangSTR(UPDATES));    // Updates (index 8 ou 9)
+        combined_menu.push_back(getLangSTR(SETTINGS));   // Settings (index 9 ou 10)
         
         int res = layout_fill_item_from_list(l, combined_menu);
-//      log_info("%s: %d", __FUNCTION__, res);
-        // reset count to current list
+        
         l->item_c = res;
-        // reduce field_size in case
         if( l->item_c < l->f_size ) l->f_size = l->item_c;
-        // save panel and set active
+        
         active_p = left_panel2;
         l->is_shown = 1;
-       log_info("%s: %p %p %p - Combined menu with %d items", __FUNCTION__, left_panel2.get(), active_p.get(), l.get(), res);
+        log_info("%s: %p %p %p - Combined menu with %d items", __FUNCTION__, left_panel2.get(), active_p.get(), l.get(), res);
     }
+    
     if(active_p == left_panel2 &&  l->page_sel.x == ON_MAIN_SCREEN){
-    rr.push_back(r);
-    ORBIS_RenderFillRects(USE_COLOR, grey, rr, 1);
-    GLES2_DrawFillingRect(rr, white, updates_prog.load());
-    rr.clear();
+        rr.push_back(r);
+        ORBIS_RenderFillRects(USE_COLOR, grey, rr, 1);
+        GLES2_DrawFillingRect(rr, white, updates_prog.load());
+        rr.clear();
     }
 
    if(1)
       GLES2_render_layout_v2(l, 0);
-
-//  log_info("%s returns", __FUNCTION__);
 }
 
 // icon_panel clone/v2
