@@ -78,11 +78,12 @@ void GLES2_render_paged_list(int unused)
         }
 
         // 2. Options supplémentaires dynamiques selon auto_install
-        if (!set.auto_install.load()) {
-            combined_menu.push_back(getLangSTR(RINSTALL)); // Ready to install (index 7 si auto_install OFF)
-        }
+        //if (!set.auto_install.load()) {
+            //combined_menu.push_back(getLangSTR(RINSTALL)); // Ready to install (index 7 si auto_install OFF)
+        //}
+        combined_menu.push_back(getLangSTR(RINSTALL));
         combined_menu.push_back(getLangSTR(QUEUE));      // Queue (index 7 ou 8)
-        combined_menu.push_back(getLangSTR(UPDATES));    // Updates (index 8 ou 9)
+        //combined_menu.push_back(getLangSTR(UPDATES));    // Updates (index 8 ou 9)
         combined_menu.push_back(getLangSTR(SETTINGS));   // Settings (index 9 ou 10)
         
         int res = layout_fill_item_from_list(l, combined_menu);
