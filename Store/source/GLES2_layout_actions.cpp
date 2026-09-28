@@ -522,18 +522,6 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
         l->vbo_s = ASK_REFRESH;
         l->curr_item = 0;
 
-        // Définition du nombre d'éléments et des textes selon auto_install
-        if (set.auto_install.load()) {
-            l->item_c = 9;
-            new_panel_text[0][7] = getLangSTR(QUEUE);
-            new_panel_text[0][8] = getLangSTR(SETTINGS);
-        } else {
-            l->item_c = 10;
-            new_panel_text[0][7] = getLangSTR(RINSTALL);
-            new_panel_text[0][8] = getLangSTR(QUEUE);
-            new_panel_text[0][9] = getLangSTR(SETTINGS);
-        }
-
         for (int i = 0; i < 7; i++) {
             new_panel_text[0][i] = group_label[i];
         }
