@@ -19,6 +19,7 @@ extern bool unsafe_source;
 extern std::shared_ptr<layout_t>  left_panel2; // for migration
 extern vec2 resolution;
 extern std::vector<std::string> download_panel_text;
+extern std::vector<std::string> group_label; // <-- Ajoute cette ligne
 
 typedef struct {
     float x, y, z;    // position (3f)
