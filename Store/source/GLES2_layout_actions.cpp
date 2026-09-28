@@ -292,10 +292,8 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                     icon_panel->is_shown = 1; 
 
                     // --- FORCER LE CHARGEMENT/TÉLÉCHARGEMENT DES ICÔNES DU GROUPE ---
-                    // Réinitialise les drapeaux pour autoriser le thread à télécharger les icônes de ce groupe tout de suite
                     is_icons_finished = true;
                     icons_thread_started = false;
-                    // Déclenche le thread de chargement/téléchargement des icônes pour le nouvel ensemble d'items
                     l->vbo_s = ASK_REFRESH;
                     // ------------------------------------------------------------------
                     
@@ -503,10 +501,23 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
     }
     if (l == icon_panel) // go to download_panel
     {
-        // --- SAUVEGARDER L'INDEX ABSOLU EXACT ---
+        // --- CORRECTION : CAPTURE EXACTE DE L'INDEX PAGINÉ DE LA GRILLE ---
+        int paged_index = (l->page_sel.y > 0 || l->page_sel.x > 0) ? (l->page_sel.x * (l->fieldsize.x * l->fieldsize.y)) + l->f_sele : l->f_sele;
+        
         if (!aux.empty() && aux[0].len > 0) {
-            idx = get_item_index(l);
+            // Si on est dans un groupe/recherche, on prend l'index stocké dans le tableau auxiliaire
+            int aux_target = (l->fieldsize.x * l->fieldsize.y * l->page_sel.x) + l->f_sele + 1; // +1 pour sauter le premier réservé
+            if (aux_target < aux.size()) {
+                idx = aux[aux_target].len;
+            } else {
+                idx = get_item_index(l);
+            }
+        } else {
+            // Sinon index direct de la page courante
+            idx = (l->page_sel.x * (l->fieldsize.x * l->fieldsize.y)) + l->f_sele;
         }
+
+        // On mémorise la position absolue exacte dans curr_item pour le retour
         icon_panel->curr_item = idx;
 
     switch_to_download:
@@ -611,7 +622,7 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
             return;
         }
         
-        // --- RETOUR VERS LA GRILLE DU JEU (RESTORE PAGE & POSITION) ---
+        // --- RETOUR VERS LA GRILLE DU JEU (RESTORE PAGE & POSITION EXACTE) ---
         menu_pos.z = ON_MAIN_SCREEN;
         l = active_p = icon_panel;  
         icon_panel->is_shown = 1;  
@@ -628,18 +639,34 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
                 if (!aux.empty() && aux[0].len > 0) {
                     icon_panel->item_c = aux[0].len;
                     
-                    // Sécurité anti-dépassement d'index
                     if (icon_panel->curr_item < 0 || icon_panel->curr_item >= icon_panel->item_c) {
                         icon_panel->curr_item = 0;
                     }
 
-                    // --- RESTAURATION EXACTE DE LA PAGE ET DE LA SÉLECTION LOCALE ---
-                    int per_page = icon_panel->fieldsize.x * icon_panel->fieldsize.y;
-                    if (per_page > 0) {
-                        icon_panel->page_sel.x = icon_panel->curr_item / per_page; // Numéro de page exact
-                        icon_panel->f_sele = icon_panel->curr_item % per_page;     // Index sur la page courante
+                    // --- RECHERCHE DE LA POSITION DANS LE GROUPE OU LA LISTE AUXILIAIRE ---
+                    int target_global_idx = icon_panel->curr_item;
+                    int per_page = icon_panel->fieldsize.x * icon_panel->fieldsize.y; // 15 par page
+                    
+                    if (!aux.empty()) {
+                        // Pour les groupes, on cherche quel index visuel correspond à cet item dans `aux`
+                        int found_pos = 0;
+                        for (int k = 1; k <= aux[0].len; k++) {
+                            if (aux[k].len == target_global_idx) {
+                                found_pos = k - 1; // position relative dans le groupe
+                                break;
+                            }
+                        }
+                        if (per_page > 0) {
+                            icon_panel->page_sel.x = found_pos / per_page;
+                            icon_panel->f_sele = found_pos % per_page;
+                        }
+                    } else {
+                        if (per_page > 0) {
+                            icon_panel->page_sel.x = target_global_idx / per_page;
+                            icon_panel->f_sele = target_global_idx % per_page;
+                        }
                     }
-                    // ----------------------------------------------------------------
+                    // ---------------------------------------------------------------------
                     
                     layout_update_sele(icon_panel, 0); 
                 }
