@@ -476,6 +476,7 @@ void GLES2_Draw_common_texts(void)
 
     // ORBIS_DrawControls(800, 25);
 
+    
     if( ! c_vbo ) // refresh
     {
         std::string tmp;
