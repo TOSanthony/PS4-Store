@@ -29,7 +29,8 @@ bool came_from_queue = false;
 
 /* set comparison token */
 void set_cmp_token(const int index)
-{    //cmp_token = index;
+{
+    //cmp_token = index;
     cmp_token = sort_patterns[index];
 }
 
@@ -446,7 +447,7 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             // update current label context
             switch (l->curr_item)
             {
-            case 0:  label = PV;      break;
+            case 0:  label = PV;     break;
             case 1:  label = AUTHOR;  break;
             }
             // build_list of patterns found
@@ -502,9 +503,10 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
     }
     if (l == icon_panel) // go to download_panel
     {
-        // set to current selected
-        l->curr_item = idx;
-        // but don't refresh indexes
+        // --- SAUVEGARDER L'INDEX ABSOLU EXACT ---
+        if (!aux.empty() && aux[0].len > 0) {
+            idx = get_item_index(l);
+        }
         icon_panel->curr_item = idx;
 
     switch_to_download:
@@ -609,10 +611,10 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
             return;
         }
         
-        // --- RETOUR VERS LA GRILLE DU JEU (AVEC GESTION DE LA PAGINATION) ---
+        // --- RETOUR VERS LA GRILLE DU JEU (RESTORE PAGE & POSITION) ---
         menu_pos.z = ON_MAIN_SCREEN;
-        l = active_p = icon_panel; 
-        icon_panel->is_shown =  1;  
+        l = active_p = icon_panel;  
+        icon_panel->is_shown = 1;  
         active_p->vbo_s = ASK_REFRESH;
         left_panel2->vbo_s = ASK_REFRESH;
 
@@ -631,14 +633,13 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
                         icon_panel->curr_item = 0;
                     }
 
-                    // --- CALCUL EXACT DE LA PAGE ET DE LA SÉLECTION LOCALE ---
-                    // fieldsize.x = colonnes (5), fieldsize.y = lignes (3) -> 15 par page
+                    // --- RESTAURATION EXACTE DE LA PAGE ET DE LA SÉLECTION LOCALE ---
                     int per_page = icon_panel->fieldsize.x * icon_panel->fieldsize.y;
                     if (per_page > 0) {
-                        icon_panel->page_sel.x = icon_panel->curr_item / per_page; // Numéro de la page
-                        icon_panel->f_sele = icon_panel->curr_item % per_page;     // Position sur la page (0 à 14)
+                        icon_panel->page_sel.x = icon_panel->curr_item / per_page; // Numéro de page exact
+                        icon_panel->f_sele = icon_panel->curr_item % per_page;     // Index sur la page courante
                     }
-                    // ----------------------------------------------------------
+                    // ----------------------------------------------------------------
                     
                     layout_update_sele(icon_panel, 0); 
                 }
@@ -707,4 +708,3 @@ void GLES2_Refresh_for_settings()
     GLES2_refresh_common();
     left_panel2->mtx.unlock();
 }
-
