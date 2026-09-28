@@ -501,20 +501,16 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
     if (l == left_panel2)
     {
         left_panel2->mtx.lock();
-        l->page_sel.x = 0; // back initial page
+        l->page_sel.x = 0; // Retour à la page initiale
         l->vbo_s = ASK_REFRESH;
-        l->item_c = 9;     // num of texts
+        l->item_c = 10;    // 7 groupes + Rinstall + Queue + Settings = 10 éléments au total
         l->curr_item = 0;
 
         // MISE À JOUR DYNAMIQUE DES COMPTEURS DE GROUPES ICI :
         for (int i = 0; i < 7; i++) {
-            int count = 0;
-            if (groups.size() > (i + 1)) {
-                count = groups[i + 1].token_c;
-            }
-            new_panel_text[0][i] = fmt::format("{} ({})", group_label[i], count);
+            new_panel_text[0][i] = group_label[i];
         }
-
+        
         log_info("layout_dispatch_O %i", l->item_c);
         layout_fill_item_from_list(l, new_panel_text[l->page_sel.x]);
         layout_update_sele(l, 0);
