@@ -30,9 +30,6 @@ void set_cmp_token(const int index)
     cmp_token = sort_patterns[index];
 }
 
-
-static enum token_name label;
-
 extern std::atomic_bool is_icons_finished;
 
 void Install_View(std::shared_ptr<layout_t>  &l, const char* query_string, enum token_name nm)
@@ -196,7 +193,6 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
     char tmp[256];
     // default indexing
     int idx = l->curr_item;
-    std::string pattern_str;
 
     if (l == queue_panel) // go to download_panel
     {
