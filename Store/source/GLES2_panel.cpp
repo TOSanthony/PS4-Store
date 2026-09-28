@@ -33,7 +33,7 @@ const char* group_labels_non_pkg_zone[] =
     "Theme",
     "App",
     "Unknown",
-    "Other"
+    "Other 2"
 };
 
 extern std::atomic_bool is_icons_finished, icons_thread_started;
