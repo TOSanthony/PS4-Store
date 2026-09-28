@@ -505,6 +505,7 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
         // set to current selected
         l->curr_item = idx;
         // but don't refresh indexes
+        icon_panel->curr_item = idx;
 
     switch_to_download:
         loadmsg(getLangSTR(DL_CACHE));
@@ -596,31 +597,22 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
     }
     else if (l == download_panel)
     {
-        // --- VÉRIFIER SI ON VENAIT DE LA FILE D'ATTENTE GRÂCE AU DRAPEAU ---
         if (came_from_queue)
         {
-            came_from_queue = false; // Réinitialisation immédiate
-            
-            // Forcer l'état global sur la file d'attente
+            came_from_queue = false;
             menu_pos.z = ON_QUEUE;
             queue_panel->is_shown = 1;
-            icon_panel->is_shown = 0; // S'assurer impérativement que la grille est masquée
-            
-            // Rediriger le pointeur actif vers la queue
+            icon_panel->is_shown = 0;
             l = active_p = queue_panel;
-            
-            // Forcer le rafraîchissement de la queue
             queue_panel->vbo_s = ASK_REFRESH;
             layout_update_sele(queue_panel, 0);
-            
-            log_info("layout_dispatch_O: safely returned to queue_panel from download_panel");
-            return; // On sort tout de suite pour éviter d'exécuter le code de la grille
+            return;
         }
         
-        // --- SINON, RETOUR VERS LA GRILLE CLASSIQUE ---
+        // --- RETOUR VERS LA GRILLE DU JEU (AVEC GESTION DE LA PAGINATION) ---
         menu_pos.z = ON_MAIN_SCREEN;
         l = active_p = icon_panel; 
-        icon_panel->is_shown = 1;  
+        icon_panel->is_shown =  1;  
         active_p->vbo_s = ASK_REFRESH;
         left_panel2->vbo_s = ASK_REFRESH;
 
@@ -634,17 +626,19 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
                 if (!aux.empty() && aux[0].len > 0) {
                     icon_panel->item_c = aux[0].len;
                     
+                    // Sécurité anti-dépassement d'index
                     if (icon_panel->curr_item < 0 || icon_panel->curr_item >= icon_panel->item_c) {
                         icon_panel->curr_item = 0;
                     }
 
-                    int target_idx = icon_panel->curr_item;
+                    // --- CALCUL EXACT DE LA PAGE ET DE LA SÉLECTION LOCALE ---
+                    // fieldsize.x = colonnes (5), fieldsize.y = lignes (3) -> 15 par page
                     int per_page = icon_panel->fieldsize.x * icon_panel->fieldsize.y;
-                    
                     if (per_page > 0) {
-                        icon_panel->page_sel.x = target_idx / per_page;
-                        icon_panel->f_sele = target_idx % per_page;
+                        icon_panel->page_sel.x = icon_panel->curr_item / per_page; // Numéro de la page
+                        icon_panel->f_sele = icon_panel->curr_item % per_page;     // Position sur la page (0 à 14)
                     }
+                    // ----------------------------------------------------------
                     
                     layout_update_sele(icon_panel, 0); 
                 }
