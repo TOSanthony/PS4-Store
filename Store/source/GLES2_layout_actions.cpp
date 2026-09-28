@@ -599,13 +599,22 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
         // --- VÉRIFIER SI ON VENAIT DE LA FILE D'ATTENTE GRÂCE AU DRAPEAU ---
         if (came_from_queue)
         {
-            came_from_queue = false; // Réinitialisation
+            came_from_queue = false; // Réinitialisation immédiate
+            
+            // Forcer l'état global sur la file d'attente
             menu_pos.z = ON_QUEUE;
-            l = active_p = queue_panel;
             queue_panel->is_shown = 1;
-            icon_panel->is_shown = 0; // S'assurer que la grille reste masquée
+            icon_panel->is_shown = 0; // S'assurer impérativement que la grille est masquée
+            
+            // Rediriger le pointeur actif vers la queue
+            l = active_p = queue_panel;
+            
+            // Forcer le rafraîchissement de la queue
             queue_panel->vbo_s = ASK_REFRESH;
-            return;
+            layout_update_sele(queue_panel, 0);
+            
+            log_info("layout_dispatch_O: safely returned to queue_panel from download_panel");
+            return; // On sort tout de suite pour éviter d'exécuter le code de la grille
         }
         
         // --- SINON, RETOUR VERS LA GRILLE CLASSIQUE ---
