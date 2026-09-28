@@ -294,12 +294,12 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             }
 
             // variable length lists
-            if (l->curr_item == 6
-                || l->curr_item == 7)
+            if (l->curr_item == 7
+                || l->curr_item == 8)
             {
-                if (l->f_sele == 6) menu_pos.z = ON_INSTALL;
+                if (l->f_sele == 7) menu_pos.z = ON_INSTALL;
                 else
-                    if (l->f_sele == 7) menu_pos.z = ON_QUEUE;
+                    if (l->f_sele == 8) menu_pos.z = ON_QUEUE;
                 // activate and set focus
                 queue_panel_init();
                 l = queue_panel; // switch control
@@ -334,7 +334,7 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 break;
             }
 
-            if (l->curr_item == 8) {
+            if (l->curr_item == 9) {
                 menu_pos.z = ON_SETTINGS;
                 active_p = option_panel;  //active_p->is_shown = 1;
             }
@@ -572,7 +572,7 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
         l->curr_item = 0;
 
         // MISE À JOUR DYNAMIQUE DES COMPTEURS DE GROUPES ICI :
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 10; i++) {
             int count = 0;
             if (groups.size() > (i + 1)) {
                 count = groups[i + 1].token_c;
