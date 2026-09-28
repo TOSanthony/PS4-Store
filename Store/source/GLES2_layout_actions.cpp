@@ -25,6 +25,8 @@ int DL_CO = -999;
 unsigned char cmp_token = 0,
 sort_patterns[11] = { 0, 1, 4, 5, 9, 10, 11, 12, 13, 16, 16 };
 
+bool came_from_queue = false;
+
 /* set comparison token */
 void set_cmp_token(const int index)
 {    //cmp_token = index;
@@ -217,22 +219,20 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
         case ON_QUEUE:    req_status = RUNNING;    break;
         }
         
-        // --- ON FORCE L'ÉTAT À ON_QUEUE POUR LE RETOUR ---
+        // --- ON INDIQUE QU'ON VIENT DE LA FILE D'ATTENTE ---
+        came_from_queue = true;
         menu_pos.z = ON_QUEUE; 
-        // ------------------------------------------------
+        // --------------------------------------------------
 
-        // get index from selected thread info
         idx = thread_find_by_status(l->f_sele, req_status);
         if (menu_pos.z == ON_QUEUE && idx == -1)
             idx = thread_find_by_status(l->f_sele, PAUSED);
-        // no results, :shrug:
+        
         if (idx < 0) {
             log_error("this should not happen %i", idx);
             msgok(WARNING, "WTF");
         }
-        // set to current selected
         icon_panel->curr_item = pt_info[idx]->g_idx;
-        // refresh indexes
         layout_update_sele(icon_panel, 0);
 
         goto switch_to_download;
@@ -516,8 +516,11 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             }
         }
 
-        // On laisse bien ON_ITEM_INFO pour que la page de téléchargement s'affiche
+        // --- ON INDIQUE QU'ON NE VIENT PAS DE LA QUEUE ---
+        came_from_queue = false;
         menu_pos.z = ON_ITEM_INFO;
+        // ------------------------------------------------
+        
         active_p = download_panel;  active_p->is_shown = 1;
         GLES2_refresh_sysinfo();
         icon_panel->mtx.lock();
@@ -593,50 +596,49 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
     }
     else if (l == download_panel)
     {
-        // --- VÉRIFIER SI ON VENAIT DE LA FILE D'ATTENTE (QUEUE) ---
-        if (menu_pos.z == ON_QUEUE)
+        // --- VÉRIFIER SI ON VENAIT DE LA FILE D'ATTENTE GRÂCE AU DRAPEAU ---
+        if (came_from_queue)
         {
+            came_from_queue = false; // Réinitialisation
             menu_pos.z = ON_QUEUE;
             l = active_p = queue_panel;
             queue_panel->is_shown = 1;
-            icon_panel->is_shown = 0;
+            icon_panel->is_shown = 0; // S'assurer que la grille reste masquée
             queue_panel->vbo_s = ASK_REFRESH;
             return;
         }
         
-        // --- RETOUR VERS LA GRILLE DU JEU ---
+        // --- SINON, RETOUR VERS LA GRILLE CLASSIQUE ---
         menu_pos.z = ON_MAIN_SCREEN;
-        l = active_p = icon_panel; // back to Icon panel
-        icon_panel->is_shown = 1;  // Réafficher la grille
+        l = active_p = icon_panel; 
+        icon_panel->is_shown = 1;  
         active_p->vbo_s = ASK_REFRESH;
         left_panel2->vbo_s = ASK_REFRESH;
 
-        // Restauration propre de la position de l'élément sans saut aléatoire
         if (left_panel2->page_sel.x == 0 && left_panel2->curr_item >= 0 && left_panel2->curr_item <= 6) {
             int current_group = left_panel2->curr_item;
             
-            aux = groups[current_group + 1].token_d;
-            aux[0].len = groups[current_group + 1].token_c;
+            if (current_group < groups.size()) {
+                aux = groups[current_group + 1].token_d;
+                aux[0].len = groups[current_group + 1].token_c;
 
-            if (!aux.empty() && aux[0].len > 0) {
-                icon_panel->item_c = aux[0].len;
-                
-                // --- SÉCURITÉ ANTI-CRASH (Empêche l'index invalide) ---
-                if (icon_panel->curr_item < 0 || icon_panel->curr_item >= icon_panel->item_c) {
-                    icon_panel->curr_item = 0;
+                if (!aux.empty() && aux[0].len > 0) {
+                    icon_panel->item_c = aux[0].len;
+                    
+                    if (icon_panel->curr_item < 0 || icon_panel->curr_item >= icon_panel->item_c) {
+                        icon_panel->curr_item = 0;
+                    }
+
+                    int target_idx = icon_panel->curr_item;
+                    int per_page = icon_panel->fieldsize.x * icon_panel->fieldsize.y;
+                    
+                    if (per_page > 0) {
+                        icon_panel->page_sel.x = target_idx / per_page;
+                        icon_panel->f_sele = target_idx % per_page;
+                    }
+                    
+                    layout_update_sele(icon_panel, 0); 
                 }
-                // -----------------------------------------------------
-                
-                // Recalcul propre de la page et de la sélection locale basées sur curr_item
-                int target_idx = icon_panel->curr_item;
-                int per_page = icon_panel->fieldsize.x * icon_panel->fieldsize.y;
-                
-                if (per_page > 0) {
-                    icon_panel->page_sel.x = target_idx / per_page;
-                    icon_panel->f_sele = target_idx % per_page;
-                }
-                
-                layout_update_sele(icon_panel, 0); 
             }
         } else {
             if (!aux.empty()) {
