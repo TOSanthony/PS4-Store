@@ -65,9 +65,13 @@ void GLES2_render_paged_list(int unused)
         l->item_c    = l->fieldsize.x * l->fieldsize.y;
 
 
-        // Charger les libellés de base des groupes
         for (int i = 0; i < 7; i++) {
-            new_panel_text[0][i] = group_label[i];
+            int count = 0;
+            if (groups.size() > (i + 1)) {
+                count = groups[i + 1].token_c;
+            }
+            // Utilisation du format natif "Nom du groupe (Quantité)"
+            new_panel_text[0][i] = fmt::format("{} ({})", group_label[i], count);
         }
         
         int res = layout_fill_item_from_list(l, new_panel_text[0]);
