@@ -264,8 +264,9 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
         left_panel2->mtx.lock();
         switch (l->page_sel.x)
         {
-        case 0: // first page (Groupes + Queue + Settings)
+        case 0: // first page (Groupes + Rinstall + Queue + Settings)
         {
+            // Les 7 groupes (0 à 6)
             if (l->curr_item >= 0 && l->curr_item <= 6) {
                 int group_index = l->curr_item;
                 aux = groups[group_index + 1].token_d;
@@ -281,30 +282,26 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 break;
             }
 
-            // Index 7 : Queue (File d'attente)
-            if (l->curr_item == 7
-                || l->curr_item == 8)
+            // Index 7 (Rinstall) et Index 8 (Queue)
+            if (l->curr_item == 7 || l->curr_item == 8)
             {
-                if (l->f_sele == 7) menu_pos.z = ON_INSTALL;
-                else
-                    if (l->f_sele == 8) menu_pos.z = ON_QUEUE;
-                // activate and set focus
+                if (l->curr_item == 7) menu_pos.z = ON_INSTALL;
+                else if (l->curr_item == 8) menu_pos.z = ON_QUEUE;
+
                 queue_panel_init();
-                l = queue_panel; // switch control
-               // l->page_sel.x = 0;
-                l->is_active =
-                    l->is_shown = 1;
-                // reset selection to first entry
-                //l->item_sel   = (ivec2) (0);
+                l = queue_panel;
+                l->is_active = l->is_shown = 1;
                 layout_update_fsize(l);
-                active_p = queue_panel;  //active_p->is_shown = 1;
+                active_p = queue_panel;
                 break;
             }
 
             // Index 9 : Settings (Paramètres)
             if (l->curr_item == 9) {
                 menu_pos.z = ON_SETTINGS;
-                active_p = option_panel;  //active_p->is_shown = 1;
+                active_p = option_panel;
+                active_p->is_shown = 1;
+                break;
             }
 
             active_p->is_shown = 1;
@@ -498,11 +495,11 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
     if (l == left_panel2)
     {
         left_panel2->mtx.lock();
-        l->page_sel.x = 0, // back initial page
-            l->vbo_s = ASK_REFRESH;
-        l->item_c = 7, // num of texts
-            l->curr_item = 0;
-            log_info("layout_dispatch_O %i", l->item_c);
+        l->page_sel.x = 0; // back initial page
+        l->vbo_s = ASK_REFRESH;
+        l->item_c = 10;    // 7 groupes + Rinstall + Queue + Settings = 10 éléments au total
+        l->curr_item = 0;
+        log_info("layout_dispatch_O %i", l->item_c);
         layout_fill_item_from_list(l, new_panel_text[l->page_sel.x]);
         layout_update_sele(l, 0);
         left_panel2->mtx.unlock();
