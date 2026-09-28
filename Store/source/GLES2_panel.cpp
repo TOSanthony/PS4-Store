@@ -27,13 +27,13 @@ extern bool unsafe_source;
 
 const char* group_labels_non_pkg_zone[] =
 {   // 0 is reserved index for: (label, total count)
-    "Game",
+    "Jeux",
     "Patch",
     "DLC",
     "Theme",
     "App",
     "Unknown",
-    "Other 2"
+    "Other"
 };
 
 extern std::atomic_bool is_icons_finished, icons_thread_started;
