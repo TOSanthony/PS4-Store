@@ -263,83 +263,56 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
         left_panel2->mtx.lock();
         switch (l->page_sel.x)
         {
-        case 0: // first page
+        case 0: // first page (Menu principal simplifié)
         {
-            if (l->curr_item == 0) {
-                menu_pos.z = ON_MAIN_SCREEN;
-                // set left_panel 2nd page
-                l->page_sel.x = 1,
-                    l->item_c = 3,
+            // Les 7 groupes occupent les index 0 à 6 :
+            if (l->curr_item >= 0 && l->curr_item <= 6) {
+                int group_index = l->curr_item;
+                
+                // Mappe les items du groupe vers l'affichage principal
+                aux = groups[group_index + 1].token_d;
+                aux[0].len = groups[group_index + 1].token_c;
+
+                // Afficher les résultats du groupe sur l'écran principal
+                if (!aux.empty() && aux[0].len) {
+                    log_info("Showing %d items for group %d", aux[0].len, group_index);
+                    menu_pos.z = ON_MAIN_SCREEN;
+                    l = active_p = icon_panel;
                     l->curr_item = 0;
-                layout_fill_item_from_list(l, new_panel_text[l->page_sel.x]);
-                layout_update_sele(l, 0);
-                active_p = icon_panel;
-                break;
-            }
+                    l->item_c = aux[0].len;
+                    
+                    // Afficher la grille de droite
+                    icon_panel->is_shown = 1; 
 
-            if (l->curr_item == 1) {
-                menu_pos.z = ON_MAIN_SCREEN;
-                Install_View(l, "Itemzflow", NAME);
-                break;
-            }
-
-            // 2 Groups
-            if (l->curr_item == 2) {
-                // set left_panel 3nd page
-                l->page_sel.x = 2,
-                l->item_c = groups[0].token_c;
-                l->curr_item = 0;
-                layout_update_sele(l, 0);
-                active_p = left_panel2;
-                break;
-            }
-
-            // variable length lists
-            if (l->curr_item == 7
-                || l->curr_item == 8)
-            {
-                if (l->f_sele == 7) menu_pos.z = ON_INSTALL;
-                else
-                    if (l->f_sele == 8) menu_pos.z = ON_QUEUE;
-                // activate and set focus
-                queue_panel_init();
-                l = queue_panel; // switch control
-               // l->page_sel.x = 0;
-                l->is_active =
-                    l->is_shown = 1;
-                // reset selection to first entry
-                //l->item_sel   = (ivec2) (0);
-                layout_update_fsize(l);
-                active_p = queue_panel;  //active_p->is_shown = 1;
-                break;
-            }
-
-            // 5 Updates (todo)
-            if (l->curr_item == 5) {
-                 if(update_check_finised){
-                    Update_View(l);
-                 }
-                 else{
-                    //msgok(WARNING, "Please wait for the update check to finish");
-                    left_panel2->mtx.unlock();
-                    #ifdef __ORBIS__
-                    if(options_dialog(getLangSTR(UPDATES_STILL_LOADING), getLangSTR(SHOW_PROG), getLangSTR(STAY_IN_BACKGROUND)) == 1){
-                        progstart(getLangSTR(CHECKING_FOR_UPDATES));
-                        show_prog = true;
-                        while(show_prog.load()){
-                            usleep(100000);
-                        }
-                    }
-                    #endif
+                    // Forcer le chargement/rafraîchissement des icônes
+                    is_icons_finished = true;
+                    icons_thread_started = false;
+                    l->vbo_s = ASK_REFRESH;
+                    
+                    layout_update_sele(l, 0);
                 }
                 break;
             }
 
-            if (l->curr_item == 9) {
-                menu_pos.z = ON_SETTINGS;
-                active_p = option_panel;  //active_p->is_shown = 1;
+            // Index 7 : File d'attente / Queue
+            if (l->curr_item == 7) {
+                menu_pos.z = ON_QUEUE;
+                queue_panel_init();
+                l = queue_panel;
+                l->is_active = l->is_shown = 1;
+                layout_update_fsize(l);
+                active_p = queue_panel;
+                break;
             }
-            // set status
+
+            // Index 8 : Paramètres / Settings
+            if (l->curr_item == 8) {
+                menu_pos.z = ON_SETTINGS;
+                active_p = option_panel;
+                active_p->is_shown = 1;
+                break;
+            }
+
             active_p->is_shown = 1;
         } 
         break;
