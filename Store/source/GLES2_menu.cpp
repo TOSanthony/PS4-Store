@@ -62,7 +62,24 @@ void GLES2_render_paged_list(int unused)
         l->fieldsize = (ivec2){ 1, 10 };
         // create the first screen we will show
         l->item_c    = l->fieldsize.x * l->fieldsize.y;
-        int res = layout_fill_item_from_list(l, new_panel_text[0]);
+        
+        // MODIFIÉ: Menu combiné - Contenu de Store Groups + options supplémentaires
+        std::vector<std::string> combined_menu;
+        // Contenu de Store Groups (7 catégories)
+        combined_menu.push_back("Game");              // case 0
+        combined_menu.push_back("Patch");             // case 1
+        combined_menu.push_back("DLC");               // case 2
+        combined_menu.push_back("Theme");             // case 3
+        combined_menu.push_back("App");               // case 4
+        combined_menu.push_back("Unknown");           // case 5
+        combined_menu.push_back("Other");             // case 6
+        // Options supplémentaires
+        combined_menu.push_back(getLangSTR(RINSTALL));    // Ready to install (case 7)
+        combined_menu.push_back(getLangSTR(QUEUE));       // Queue (case 8)
+        combined_menu.push_back(getLangSTR(UPDATES));     // Updates (case 9)
+        combined_menu.push_back(getLangSTR(SETTINGS));    // Settings (case 10)
+        
+        int res = layout_fill_item_from_list(l, combined_menu);
 //      log_info("%s: %d", __FUNCTION__, res);
         // reset count to current list
         l->item_c = res;
@@ -71,7 +88,7 @@ void GLES2_render_paged_list(int unused)
         // save panel and set active
         active_p = left_panel2;
         l->is_shown = 1;
-       log_info("%s: %p %p %p", __FUNCTION__, left_panel2.get(), active_p.get(), l.get());
+       log_info("%s: %p %p %p - Combined menu with %d items", __FUNCTION__, left_panel2.get(), active_p.get(), l.get(), res);
     }
     if(active_p == left_panel2 &&  l->page_sel.x == ON_MAIN_SCREEN){
     rr.push_back(r);
@@ -200,7 +217,7 @@ void GLES2_render_download_panel(void)
                 // BACK PRESSED SO STATUS IS CHANGED TO REDRAW
                old_status = -1;
               // if(games[ idx ].update_status == (update_ret)UPDATE_NOT_CHECKED)
-                //  CheckUpdate(li.token_d[ID].off.c_str(), li);
+                 //  CheckUpdate(li.token_d[ID].off.c_str(), li);
                // RESET MENU SELECTIOM
                if(games[ idx ].update_status == UPDATE_FOUND)
                   download_panel_text[0] = getLangSTR(UPDATE_NOW);
@@ -298,7 +315,7 @@ void GLES2_render_download_panel(void)
                           tmp = "Pending";
                         else
                           tmp = std::to_string(/* Check with Stores API for # of DLs*/ DL_CO);
-              
+                
                        // if(!ta)
                          //  CheckUpdate(li.token_d[ ID ].off.c_str(), li);
                     }
