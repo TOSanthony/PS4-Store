@@ -1,7 +1,7 @@
 
 # Package metadata.
 TITLE       := Store
-VERSION     := 2.00
+VERSION     := 2.05
 TITLE_ID    := NPXS39041
 CONTENT_ID  := IV0002-NPXS39041_00-STOREUPD00000000
 
