@@ -252,12 +252,7 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
     }
 
     /* follows actions for panels */
-    if (l == left_panel2)
-    {
-        left_panel2->mtx.lock();
-        switch (l->page_sel.x)
-        {
-        case 0: // first page - Menu principal personnalisé
+    case 0: // first page - Menu principal personnalisé
         {
             if (l->curr_item >= 0 && l->curr_item <= 6) {
                 // Store Groups (indices 0-6)
@@ -274,29 +269,13 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 }
                 break;
             }
-
-            // Détermination dynamique des index selon auto_install
-            //int rinstall_idx = -1;
-            //int queue_idx = 7;
-            //int updates_idx = 8;
-            //int settings_idx = 9;
-
-            //if (!set.auto_install.load()) {
-                // Si auto_install est OFF, RINSTALL est présent à l'index 7
-                //rinstall_idx = 7;
-                //queue_idx = 8;
-                //updates_idx = 9;
-                //settings_idx = 10;
-           //} else {
-                // Si auto_install est ON, pas de RINSTALL, Queue passe à 7
-                //queue_idx = 7;
-                //updates_idx = 8;
-                //settings_idx = 9;
-            }
-
-            int rinstall_idx = 7;
-            int queue_idx = 8;
-            int settings_idx = 9;
+            
+            // Définition propre des index (Sans Updates)
+            // Si auto_install est OFF : 7 = Rinstall, 8 = Queue, 9 = Settings
+            // Si auto_install est ON  : 7 = Queue, 8 = Settings
+            int rinstall_idx = set.auto_install.load() ? -1 : 7;
+            int queue_idx    = set.auto_install.load() ? 7 : 8;
+            int settings_idx = set.auto_install.load() ? 8 : 9;
             
             if (rinstall_idx != -1 && l->curr_item == rinstall_idx) {
                 // Ready to install
@@ -317,34 +296,6 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 l->is_active = l->is_shown = 1;
                 layout_update_fsize(l);
                 active_p = queue_panel;
-                break;
-            }
-
-            if (l->curr_item == updates_idx) {
-                // Updates
-                if(!unsafe_source){
-                    if(update_check_finised){
-                        Update_View(l);
-                    }
-                    else{
-                        left_panel2->mtx.unlock();
-                         #ifdef __ORBIS__
-                        if(options_dialog(getLangSTR(UPDATES_STILL_LOADING), getLangSTR(SHOW_PROG), getLangSTR(STAY_IN_BACKGROUND)) == 1){
-                            progstart(getLangSTR(CHECKING_FOR_UPDATES));
-                            show_prog = true;
-                            while(show_prog.load()){
-                                usleep(100000);
-                            }
-                        }
-                        #endif
-                    }
-                 }
-                 else{
-                    #ifdef __ORBIS__
-                    msgok(WARNING, "The Updates feature is not available on Unsafe CDNs");
-                    #endif
-                    log_info("unsafe source, skip update");
-                 }
                 break;
             }
 
