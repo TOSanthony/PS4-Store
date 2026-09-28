@@ -252,7 +252,12 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
     }
 
     /* follows actions for panels */
-    case 0: // first page - Menu principal personnalisé
+    if (l == left_panel2)
+    {
+        left_panel2->mtx.lock();
+        switch (l->page_sel.x)
+        {
+        case 0: // first page - Menu principal personnalisé
         {
             if (l->curr_item >= 0 && l->curr_item <= 6) {
                 // Store Groups (indices 0-6)
@@ -271,8 +276,6 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             }
             
             // Définition propre des index (Sans Updates)
-            // Si auto_install est OFF : 7 = Rinstall, 8 = Queue, 9 = Settings
-            // Si auto_install est ON  : 7 = Queue, 8 = Settings
             int rinstall_idx = set.auto_install.load() ? -1 : 7;
             int queue_idx    = set.auto_install.load() ? 7 : 8;
             int settings_idx = set.auto_install.load() ? 8 : 9;
@@ -308,18 +311,18 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             }
             
             active_p->is_shown = 1;
+            break;
         } 
-        break;
 
         case 2: // on Groups page
         {
             // Afficher les jeux du groupe sélectionné
             aux = groups[l->curr_item + 1].token_d;
-            aux[0].len = groups[l->curr_item + 1].token_c;
+            aux[0].len = groups[group_index + 1].token_c; // ou groups[l->curr_item + 1].token_c selon ton code
 
             if (!aux.empty() && aux[0].len)
             {
-                log_info("Showing %d items for group '%s' @ %p", aux[0].len, aux[0].off.c_str(), &aux);
+                log_info("Showing %d items for group @ %p", aux[0].len, &aux);
                 menu_pos.z = ON_MAIN_SCREEN;
                 l = active_p = icon_panel;
                 l->curr_item = 0;
@@ -334,9 +337,8 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             }
             break;
         } 
-        break;
 
-        } // End switch
+        } // End switch (l->page_sel.x)
 
         l->vbo_s = ASK_REFRESH; // ask to refresh VBO
 
