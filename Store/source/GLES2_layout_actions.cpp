@@ -264,33 +264,24 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
         left_panel2->mtx.lock();
         switch (l->page_sel.x)
         {
-        case 0: // first page (Menu principal simplifié)
+        case 0: // first page (Groupes + Queue + Settings)
         {
-            // Les 7 groupes occupent les index 0 à 6 :
             if (l->curr_item >= 0 && l->curr_item <= 6) {
                 int group_index = l->curr_item;
-                
                 aux = groups[group_index + 1].token_d;
                 aux[0].len = groups[group_index + 1].token_c;
 
                 if (!aux.empty() && aux[0].len) {
-                    log_info("Showing %d items for group %d", aux[0].len, group_index);
                     menu_pos.z = ON_MAIN_SCREEN;
                     l = active_p = icon_panel;
                     l->curr_item = 0;
                     l->item_c = aux[0].len;
-                    
-                    icon_panel->is_shown = 1; 
-                    is_icons_finished = true;
-                    icons_thread_started = false;
-                    l->vbo_s = ASK_REFRESH;
-                    
                     layout_update_sele(l, 0);
                 }
                 break;
             }
 
-            // Index 7 : File d'attente / Queue
+            // Index 7 : Queue (File d'attente)
             if (l->curr_item == 7) {
                 menu_pos.z = ON_QUEUE;
                 queue_panel_init();
@@ -301,7 +292,7 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 break;
             }
 
-            // Index 8 : Paramètres / Settings
+            // Index 8 : Settings (Paramètres)
             if (l->curr_item == 8) {
                 menu_pos.z = ON_SETTINGS;
                 active_p = option_panel;
@@ -506,7 +497,8 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
         l->item_c = 9;
         l->curr_item = 0;
 
-        for (int i = 0; i < 9; i++) {
+        // On met à jour les compteurs uniquement pour les 7 groupes (0 à 6)
+        for (int i = 0; i < 7; i++) {
             int count = 0;
             if (groups.size() > (i + 1)) {
                 count = groups[i + 1].token_c;
