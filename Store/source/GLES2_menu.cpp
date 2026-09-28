@@ -52,46 +52,41 @@ void GLES2_render_paged_list(int unused)
 {
     std::shared_ptr<layout_t>  &l = left_panel2;
     std::vector<vec4> rr;
+    vec4 r = (vec4) { -.985, -.100,   -.505, -.105 };
 
     if(!l.get() || l->item_d.empty() )
-    {   
-        int count = 64;
+    {   // count is known in advance!
+        int count = 64;//200;
+        // dynalloc and init this panel
         l = GLES2_layout_init( count );
         l->bound_box =  (vec4){ 0, 900,   500, 700 };
         l->fieldsize = (ivec2){ 1, 10 };
+        // create the first screen we will show
         l->item_c    = l->fieldsize.x * l->fieldsize.y;
-
-        // --- GESTION DYNAMIQUE DU MENU DE GAUCHE (AUTO_INSTALL) ---
-        // On remplit le tableau de textes de la page 0 selon l'option auto_install
-        for (int i = 0; i < 7; i++) {
-            new_panel_text[0][i] = group_label[i];
-        }
-
-        if (set.auto_install.load()) {
-            // Auto-install ON (9 éléments : 0 à 6 = groupes, 7 = Queue, 8 = Settings)
-            new_panel_text[0][7] = getLangSTR(QUEUE);
-            new_panel_text[0][8] = getLangSTR(SETTINGS);
-        } else {
-            // Auto-install OFF (10 éléments : 0 à 6 = groupes, 7 = Rinstall, 8 = Queue, 9 = Settings)
-            new_panel_text[0][7] = getLangSTR(RINSTALL);
-            new_panel_text[0][8] = getLangSTR(QUEUE);
-            new_panel_text[0][9] = getLangSTR(SETTINGS);
-        }
-        // -----------------------------------------------------------
-
         int res = layout_fill_item_from_list(l, new_panel_text[0]);
-        
+//      log_info("%s: %d", __FUNCTION__, res);
+        // reset count to current list
         l->item_c = res;
+        // reduce field_size in case
         if( l->item_c < l->f_size ) l->f_size = l->item_c;
-        
+        // save panel and set active
         active_p = left_panel2;
         l->is_shown = 1;
-        log_info("%s: %p %p %p", __FUNCTION__, left_panel2.get(), active_p.get(), l.get());
+       log_info("%s: %p %p %p", __FUNCTION__, left_panel2.get(), active_p.get(), l.get());
+    }
+    if(active_p == left_panel2 &&  l->page_sel.x == ON_MAIN_SCREEN){
+    rr.push_back(r);
+    ORBIS_RenderFillRects(USE_COLOR, grey, rr, 1);
+    GLES2_DrawFillingRect(rr, white, updates_prog.load());
+    rr.clear();
     }
 
    if(1)
       GLES2_render_layout_v2(l, 0);
+
+//  log_info("%s returns", __FUNCTION__);
 }
+
 // icon_panel clone/v2
 void GLES2_render_icon_list(int unused)
 {
