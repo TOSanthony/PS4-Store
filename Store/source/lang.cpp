@@ -187,7 +187,7 @@ void fill_menu_text() {
     stropts[lang_key[INSTALL_COMPLETE]] = "Installation Complete!";
   }
 
-  // 1. Charger d'abord les libellés des groupes
+  // 1. Définir d'abord les libellés des groupes et des options
   group_label[6] = getLangSTR(OTHER);
   group_label[5] = getLangSTR(UTLIITY);
   group_label[4] = getLangSTR(PLUGINS);
@@ -199,14 +199,12 @@ void fill_menu_text() {
   for (int i = 0; i < 7; i++) {
       if (unsafe_source) {
           group_label[i] = group_labels_non_pkg_zone[i];
-          log_info("group_label[%d] assigned to non-pkg-zone label: %s", i, group_label[i].c_str());
       } else {
-          group_label[i] = group_labels_non_pkg_zone[i]; // ou tes labels par défaut si tu préfères
-          log_info("group_label[%d] using default label: %s", i, group_label[i].c_str());
+          group_label[i] = group_labels_non_pkg_zone[i];
       }
   }
 
-  // 2. Ensuite, assigner le menu principal (Page 0) avec les 9 éléments
+  // 2. Ensuite, assigner le menu principal (Page 0) avec 9 éléments (0 à 8)
   new_panel_text[0][0] = group_label[0]; // Game
   new_panel_text[0][1] = group_label[1]; // Patch / Emu
   new_panel_text[0][2] = group_label[2]; // DLC
@@ -214,11 +212,10 @@ void fill_menu_text() {
   new_panel_text[0][4] = group_label[4]; // App
   new_panel_text[0][5] = group_label[5]; // Unknown
   new_panel_text[0][6] = group_label[6]; // Other
-  new_panel_text[0][6] = getLangSTR(RINSTALL);
-  new_panel_text[0][8] = getLangSTR(QUEUE);
-  new_panel_text[0][9] = getLangSTR(SETTINGS);
+  new_panel_text[0][7] = getLangSTR(QUEUE);
+  new_panel_text[0][8] = getLangSTR(SETTINGS);
 
-  // 3. Le reste des textes
+  // Le reste de tes assignations...
   new_panel_text[3][10] = getLangSTR(NUMB_OF_DL);
   new_panel_text[3][9] = getLangSTR(RDATE);
   new_panel_text[3][8] = getLangSTR(PV2);
@@ -238,7 +235,6 @@ void fill_menu_text() {
 
   download_panel_text[1] = getLangSTR(INSTALL2);
   download_panel_text[0] = getLangSTR(DL2);
-  
   option_panel_text[0] = getLangSTR(SETTINGS_1);
   option_panel_text[1] = getLangSTR(SETTINGS_2);
   option_panel_text[2] = getLangSTR(SETTINGS_3);
