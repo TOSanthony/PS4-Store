@@ -315,12 +315,35 @@ void GLES2_Draw_sysinfo(void)
         // add border, in px
               origin -= border;
               pen     = origin;
+        
         /* get systime */
-        time_t     t  = time(NULL);
+        //time_t     t  = time(NULL);
+        //struct tm *tm = localtime(&t);
+        //std::array<char, 65> time_str;
+        //strftime(time_str.data(), time_str.size(), "%A, %B %e %Y, %H:%M", tm); // custom date string
+        //tmp = time_str.data();
+
+        /* get systime */
+        time_t     t   = time(NULL);
         struct tm *tm = localtime(&t);
-        std::array<char, 65> time_str;
-        strftime(time_str.data(), time_str.size(), "%A, %B %e %Y, %H:%M", tm); // custom date string
-        tmp = time_str.data();
+
+        // Tableaux des jours et mois en français
+        const char* days_fr[] = { "Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi" };
+        const char* months_fr[] = { "janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre" };
+
+        std::string day_str = (tm->tm_wday >= 0 && tm->tm_wday < 7) ? days_fr[tm->tm_wday] : "";
+        std::string month_str = (tm->tm_mon >= 0 && tm->tm_mon < 12) ? months_fr[tm->tm_mon] : "";
+
+        // Format français : "Lundi, 29 septembre 2026, 13:33"
+        tmp = fmt::format("{}, {} {} {}, {:02d}:{:02d}", 
+                          day_str, 
+                          tm->tm_mday, 
+                          month_str, 
+                          tm->tm_year + 1900, 
+                          tm->tm_hour, 
+                          tm->tm_min);
+
+        
         // we need to know Text_Length_in_px in advance, so we call this:
         texture_font_load_glyphs( sub_font, tmp.c_str() );
         // we know 'tl' now, right align
@@ -329,6 +352,11 @@ void GLES2_Draw_sysinfo(void)
         //add_text( t_vbo, sub_font, tmp.c_str(), &col, &pen);
         t_vbo.add_text( sub_font, tmp, col, pen);
 
+
+        // ---------------------------------------------------------
+        // Masquer la System Version : commente ou supprime ces lignes
+        // ---------------------------------------------------------
+        /*
         uint32_t numb = 70;
         size_t fmem = 0;
 #if defined(__ORBIS__)
@@ -345,7 +373,12 @@ void GLES2_Draw_sysinfo(void)
         // fill the vbo
         //add_text( t_vbo, main_font, tmp.c_str(), &c, &pen);
         t_vbo.add_text( main_font, tmp, c, pen);
+        */
 
+        // ---------------------------------------------------------
+        // Masquer la Store Version : commente ou supprime ces lignes
+        // ---------------------------------------------------------
+        /*
         tmp = fmt::format("{}: {}", getLangSTR(STORE_VER), completeVersion);
         // we need to know Text_Length_in_px in advance, so we call this:
         texture_font_load_glyphs( main_font, tmp.c_str() ); 
@@ -355,6 +388,7 @@ void GLES2_Draw_sysinfo(void)
         // fill the vbo
         //add_text( t_vbo, main_font, tmp.c_str(), &c, &pen);
         t_vbo.add_text( main_font, tmp, c, pen);
+        */
 
         // eventually, skip dfp on some view...
         if(menu_pos.z < ON_ITEMzFLOW)
