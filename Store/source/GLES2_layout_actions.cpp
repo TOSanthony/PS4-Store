@@ -259,7 +259,12 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
     }
 
     /* follows actions for panels */
-    case 0: // first page
+    if (l == left_panel2)
+    {
+        left_panel2->mtx.lock();
+        switch (l->page_sel.x)
+        {
+        case 0: // first page
         {
             // Les 7 groupes (0 à 6)
             if (l->curr_item >= 0 && l->curr_item <= 6) {
