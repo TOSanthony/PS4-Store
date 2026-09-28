@@ -312,13 +312,13 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             
             active_p->is_shown = 1;
             break;
-        } 
-
+        }
+            
         case 2: // on Groups page
         {
             // Afficher les jeux du groupe sélectionné
             aux = groups[l->curr_item + 1].token_d;
-            aux[0].len = groups[group_index + 1].token_c; // ou groups[l->curr_item + 1].token_c selon ton code
+            aux[0].len = groups[l->curr_item + 1].token_c;
 
             if (!aux.empty() && aux[0].len)
             {
@@ -336,7 +336,7 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 #endif
             }
             break;
-        } 
+        }
 
         } // End switch (l->page_sel.x)
 
