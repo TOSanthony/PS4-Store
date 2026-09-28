@@ -51,7 +51,7 @@ void GLES2_render_paged_list(int unused)
 {
     std::shared_ptr<layout_t>  &l = left_panel2;
     std::vector<vec4> rr;
-    vec4 r = (vec4) { -.985, -.100,   -.505, -.105 };
+    //vec4 r = (vec4) { -.985, -.100,   -.505, -.105 };
 
     if(!l.get() || l->item_d.empty() )
     {   // count is known in advance!
