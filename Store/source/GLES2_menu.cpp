@@ -66,14 +66,13 @@ void GLES2_render_paged_list(int unused)
 
         // 1. Récupération dynamique des 7 groupes avec leurs compteurs réels
         for (int i = 0; i < 7; i++) {
-            int group_count = 0;
-            if (groups.size() > (i + 1)) {
-                group_count = groups[i + 1].token_c;
-            }
+            //int group_count = 0;
+            //if (groups.size() > (i + 1)) {
+                //group_count = groups[i + 1].token_c;
+            //}
             // Utilisation du libellé de groupe avec sa quantité entre parenthèses
-            std::string label = (group_label.size() > i && !group_label[i].empty()) ? group_label[i] : "Group";
+            //std::string label = (group_label.size() > i && !group_label[i].empty()) ? group_label[i] : "Group";
             //combined_menu.push_back(fmt::format("{} ({})", label, group_count));
-            log_info(group_count);
             combined_menu.push_back(label);
         }
 
