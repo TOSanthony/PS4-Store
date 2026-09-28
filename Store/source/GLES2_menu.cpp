@@ -72,7 +72,8 @@ void GLES2_render_paged_list(int unused)
             }
             // Utilisation du libellé de groupe avec sa quantité entre parenthèses
             std::string label = (group_label.size() > i && !group_label[i].empty()) ? group_label[i] : "Group";
-            combined_menu.push_back(fmt::format("{} ({})", label, group_count));
+            //combined_menu.push_back(fmt::format("{} ({})", label, group_count));
+            combined_menu.push_back(label);
         }
 
         // 2. Options supplémentaires dynamiques selon auto_install
