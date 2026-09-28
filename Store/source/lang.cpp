@@ -161,7 +161,6 @@ void fill_menu_text() {
   //lang_key[STR_NOT_FOUND]
   if (stropts[lang_key[CANCEL]].empty()) {
     stropts[lang_key[SETTINGS_6]] = "Automatically install";
-    //SETTINGS_5
     stropts[lang_key[AUTO_FAILURE_ERROR]] = "Show Install Progress is Required to be Disabled to Enable this Setting";
     stropts[lang_key[INSTALL_PROG_ERROR]] = "Auto Install is Required to be Disabled to Enable this Setting";
 
@@ -176,7 +175,7 @@ void fill_menu_text() {
     stropts[lang_key[UPDATE_NOW]] = "Update Now";
     stropts[lang_key[REINSTALL_APP]] = "Reinstall Latest";
   }
-  // keep compitability with older store pkgs and unupdated langs
+  
   if (stropts[lang_key[PRE_LOADING_CACHE]].empty()) {
     stropts[lang_key[SETTINGS_5]] = "Pre-load Cached Icons On Startup";
     stropts[lang_key[PRE_LOAD_SETTING]] = "Pre-load Cached Icons On Startup";
@@ -186,9 +185,39 @@ void fill_menu_text() {
     stropts[lang_key[SHOW_PROG]] = "Show Progress";
     stropts[lang_key[STAY_IN_BACKGROUND]] = "Stay in Background";
     stropts[lang_key[INSTALL_COMPLETE]] = "Installation Complete!";
-
   }
 
+  // 1. Charger d'abord les libellés des groupes
+  group_label[6] = getLangSTR(OTHER);
+  group_label[5] = getLangSTR(UTLIITY);
+  group_label[4] = getLangSTR(PLUGINS);
+  group_label[3] = getLangSTR(MEDIA);
+  group_label[2] = getLangSTR(EMU_ADDON);
+  group_label[1] = getLangSTR(EMU);
+  group_label[0] = getLangSTR(HB_GAME);
+
+  for (int i = 0; i < 7; i++) {
+      if (unsafe_source) {
+          group_label[i] = group_labels_non_pkg_zone[i];
+          log_info("group_label[%d] assigned to non-pkg-zone label: %s", i, group_label[i].c_str());
+      } else {
+          group_label[i] = group_labels_non_pkg_zone[i]; // ou tes labels par défaut si tu préfères
+          log_info("group_label[%d] using default label: %s", i, group_label[i].c_str());
+      }
+  }
+
+  // 2. Ensuite, assigner le menu principal (Page 0) avec les 9 éléments
+  new_panel_text[0][0] = group_label[0]; // Game
+  new_panel_text[0][1] = group_label[1]; // Patch / Emu
+  new_panel_text[0][2] = group_label[2]; // DLC
+  new_panel_text[0][3] = group_label[3]; // Theme
+  new_panel_text[0][4] = group_label[4]; // App
+  new_panel_text[0][5] = group_label[5]; // Unknown
+  new_panel_text[0][6] = group_label[6]; // Other
+  new_panel_text[0][7] = getLangSTR(QUEUE);
+  new_panel_text[0][8] = getLangSTR(SETTINGS);
+
+  // 3. Le reste des textes
   new_panel_text[3][10] = getLangSTR(NUMB_OF_DL);
   new_panel_text[3][9] = getLangSTR(RDATE);
   new_panel_text[3][8] = getLangSTR(PV2);
@@ -205,22 +234,10 @@ void fill_menu_text() {
   new_panel_text[1][2] = getLangSTR(FILTER_BY);
   new_panel_text[1][1] = getLangSTR(SORT_BY);
   new_panel_text[1][0] = getLangSTR(SEARCH);
-  new_panel_text[0][6] = getLangSTR(SETTINGS);
-  new_panel_text[0][5] = getLangSTR(UPDATES);
-  new_panel_text[0][4] = getLangSTR(QUEUE);
-  new_panel_text[0][3] = getLangSTR(RINSTALL);
-  new_panel_text[0][2] = getLangSTR(STRG);
-  new_panel_text[0][1] = getLangSTR(IAPPS);
-  new_panel_text[0][0] = getLangSTR(SAPPS);
+
   download_panel_text[1] = getLangSTR(INSTALL2);
   download_panel_text[0] = getLangSTR(DL2);
-  group_label[6] = getLangSTR(OTHER);
-  group_label[5] = getLangSTR(UTLIITY);
-  group_label[4] = getLangSTR(PLUGINS);
-  group_label[3] = getLangSTR(MEDIA);
-  group_label[2] = getLangSTR(EMU_ADDON);
-  group_label[1] = getLangSTR(EMU);
-  group_label[0] = getLangSTR(HB_GAME);
+  
   option_panel_text[0] = getLangSTR(SETTINGS_1);
   option_panel_text[1] = getLangSTR(SETTINGS_2);
   option_panel_text[2] = getLangSTR(SETTINGS_3);
@@ -232,16 +249,8 @@ void fill_menu_text() {
   option_panel_text[8] = getLangSTR(SETTINGS_9);
   option_panel_text[9] = getLangSTR(SETTINGS_10);
   download_panel_text[2] = getLangSTR(CANCEL);
-
-  for (int i = 0; i < 7; i++) {
-    if (unsafe_source)
-        group_label[i] = group_labels_non_pkg_zone[i];
-        
-    //log_info("group_label[%d] = %s | unsafe_source %i", i, group_label[i].c_str(), unsafe_source);
-  }
-
-
 }
+
 // OVERWRITE_SAVE
 extern uint8_t lang_ini[];
 extern int32_t lang_ini_sz;
