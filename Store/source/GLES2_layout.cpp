@@ -188,22 +188,26 @@ static void layout_compose_text(std::shared_ptr<layout_t> &l, int idx, vec2 &pen
                     int req_status = 0;
 
                     // Détermination dynamique des indices selon auto_install
-                    int rinstall_idx = -1;
+                    //int rinstall_idx = -1;
+                    //int queue_idx = 8;
+                    //int updates_idx = 9;
+                    //int settings_idx = 10;
+
+                    //if (!set.auto_install.load()) {
+                        //rinstall_idx = 7;
+                        //queue_idx = 8;
+                        //updates_idx = 9;
+                        //settings_idx = 10;
+                    //} else {
+                        //queue_idx = 7;
+                        //updates_idx = 8;
+                        //settings_idx = 9;
+                    //}
+
+                    int rinstall_idx = 7;
                     int queue_idx = 8;
-                    int updates_idx = 9;
-                    int settings_idx = 10;
-
-                    if (!set.auto_install.load()) {
-                        rinstall_idx = 7;
-                        queue_idx = 8;
-                        updates_idx = 9;
-                        settings_idx = 10;
-                    } else {
-                        queue_idx = 7;
-                        updates_idx = 8;
-                        settings_idx = 9;
-                    }
-
+                    int settings_idx = 9;
+                    
                     switch(idx)
                     {
                         case 0: // Game
@@ -229,9 +233,9 @@ static void layout_compose_text(std::shared_ptr<layout_t> &l, int idx, vec2 &pen
                             else if (idx == queue_idx) {
                                 req_status = RUNNING;
                             }
-                            else if (idx == updates_idx) {
-                                ret = updates_counter.load();
-                            }
+                            //else if (idx == updates_idx) {
+                                //ret = updates_counter.load();
+                            //}
                             else if (idx == settings_idx) {
                                 // Settings n'a pas de compteur
                             }
