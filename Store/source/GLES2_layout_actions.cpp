@@ -261,11 +261,17 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
         {
             if (l->curr_item >= 0 && l->curr_item <= 6) {
                 // Store Groups (indices 0-6)
-                l->page_sel.x = 2;
-                l->item_c = groups[l->curr_item + 1].token_c;
-                l->curr_item = 0;
-                layout_update_sele(l, 0);
-                active_p = left_panel2;
+                int group_index = l->curr_item;
+                aux = groups[group_index + 1].token_d;
+                aux[0].len = groups[group_index + 1].token_c;
+
+                if (!aux.empty() && aux[0].len) {
+                    menu_pos.z = ON_MAIN_SCREEN; // Indiquer qu'on revient sur l'écran principal
+                    l = active_p = icon_panel;    // Basculer le contrôle sur la grille de jeux
+                    l->curr_item = 0;
+                    l->item_c = aux[0].len;
+                    layout_update_sele(l, 0);
+                }
                 break;
             }
 
