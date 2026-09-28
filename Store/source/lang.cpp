@@ -214,8 +214,9 @@ void fill_menu_text() {
   new_panel_text[0][4] = group_label[4]; // App
   new_panel_text[0][5] = group_label[5]; // Unknown
   new_panel_text[0][6] = group_label[6]; // Other
-  new_panel_text[0][7] = getLangSTR(QUEUE);
-  new_panel_text[0][8] = getLangSTR(SETTINGS);
+  new_panel_text[0][6] = getLangSTR(RINSTALL);
+  new_panel_text[0][8] = getLangSTR(QUEUE);
+  new_panel_text[0][9] = getLangSTR(SETTINGS);
 
   // 3. Le reste des textes
   new_panel_text[3][10] = getLangSTR(NUMB_OF_DL);
