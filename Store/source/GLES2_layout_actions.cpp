@@ -276,11 +276,11 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             }
             
             // Définition propre des index (Sans Updates)
-            int rinstall_idx = set.auto_install.load() ? -1 : 7;
-            int queue_idx    = set.auto_install.load() ? 7 : 8;
-            int settings_idx = set.auto_install.load() ? 8 : 9;
+            int rinstall_idx = 7;
+            int queue_idx    = 8;
+            int settings_idx = 9;
             
-            if (rinstall_idx != -1 && l->curr_item == rinstall_idx) {
+            if (l->curr_item == rinstall_idx) {
                 // Ready to install
                 menu_pos.z = ON_INSTALL;
                 queue_panel_init();
