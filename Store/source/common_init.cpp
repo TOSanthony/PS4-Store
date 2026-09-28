@@ -237,11 +237,6 @@ int initGL_for_the_store(bool reload_apps, int ref_pages)
         return INIT_FAILED;
     }
 
-    //dont_show_donate_message
-    if (!if_exists("/data/DSDM"))
-         msgok(NORMAL, "Do You enjoy the Homebrew Store?\n\nIf you do, consider supporting us here at https://pkg-zone.com\nOR\nBy one of the following methods\nKo-fi: https://ko-fi.com/lightningmods\nBTC: bc1qgclk220glhffjkgraju7d8xjlf7teks3cnwuu9");
-    
-
     // all fine.
     return PS4_OK;
 }
