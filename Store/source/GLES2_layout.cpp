@@ -184,33 +184,28 @@ static void layout_compose_text(std::shared_ptr<layout_t> &l, int idx, vec2 &pen
 
                 if(l->page_sel.x == 0) // menu principal personnalisé
                 {
-                    /*
-                        Menu gauche :
-
-                        0  - Game
-                        1  - Patch
-                        2  - DLC
-                        3  - Theme
-                        4  - App
-                        5  - Unknown
-                        6  - Other
-                        7  - Ready to install
-                        8  - Queue
-                        9  - Updates
-                        10 - Settings
-                    */
-
                     int ret = 0;
                     int req_status = 0;
 
+                    // Détermination dynamique des indices selon auto_install
+                    int rinstall_idx = -1;
+                    int queue_idx = 8;
+                    int updates_idx = 9;
+                    int settings_idx = 10;
+
+                    if (!set.auto_install.load()) {
+                        rinstall_idx = 7;
+                        queue_idx = 8;
+                        updates_idx = 9;
+                        settings_idx = 10;
+                    } else {
+                        queue_idx = 7;
+                        updates_idx = 8;
+                        settings_idx = 9;
+                    }
+
                     switch(idx)
                     {
-                        /*
-                            Store Groups.
-
-                            groups[0] contient le total général.
-                            Les groupes commencent donc à groups[1].
-                        */
                         case 0: // Game
                         case 1: // Patch
                         case 2: // DLC
@@ -220,76 +215,43 @@ static void layout_compose_text(std::shared_ptr<layout_t> &l, int idx, vec2 &pen
                         case 6: // Other
                         {
                             const int group_index = idx + 1;
-
                             if(group_index < static_cast<int>(groups.size()))
                             {
                                 ret = groups[group_index].token_c;
                             }
-
-                            break;
-                        }
-
-                        case 7: // Ready to install
-                        {
-                            if(set.auto_install.load())
-                                req_status = INSTALLING_APP;
-                            else
-                                req_status = COMPLETED;
-
-                            break;
-                        }
-
-                        case 8: // Queue
-                        {
-                            req_status = RUNNING;
-                            break;
-                        }
-
-                        case 9: // Updates
-                        {
-                            ret = updates_counter.load();
-                            break;
-                        }
-
-                        case 10: // Settings
-                        {
-                            // Settings n'a pas de compteur
                             break;
                         }
 
                         default:
+                            if (idx == rinstall_idx) {
+                                req_status = set.auto_install.load() ? INSTALLING_APP : COMPLETED;
+                            }
+                            else if (idx == queue_idx) {
+                                req_status = RUNNING;
+                            }
+                            else if (idx == updates_idx) {
+                                ret = updates_counter.load();
+                            }
+                            else if (idx == settings_idx) {
+                                // Settings n'a pas de compteur
+                            }
                             break;
                     }
 
-                    /*
-                        Compteurs dynamiques :
-                        - Ready to install
-                        - Queue
-                    */
                     if(req_status)
                     {
                         ret = thread_count_by_status(req_status);
-
-                        if(idx == 8) // Queue
+                        if(idx == queue_idx)
                         {
                             ret += thread_count_by_status(PAUSED);
                         }
                     }
 
-                    /*
-                        Affichage du nombre à droite du nom.
-                    */
                     if(ret > 0)
                     {
-                        // Afficher le nom de l'élément
                         l->vbo.add_text(sub_font, tmp, col, pen);
-
-                        // Préparer le compteur
                         tmp = std::to_string(ret);
-
                         texture_font_load_glyphs(sub_font, tmp.c_str());
-
-                        // Positionner le compteur à droite
                         pen.x = 460 - tl;
                     }
                 }
