@@ -518,22 +518,24 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
     if (l == left_panel2)
     {
         left_panel2->mtx.lock();
-        l->page_sel.x = 0; // page initiale
+        l->page_sel.x = 0;
         l->vbo_s = ASK_REFRESH;
         l->curr_item = 0;
 
-        // Adaptation dynamique selon auto_install
+        // Définition du nombre d'éléments et des textes selon auto_install
         if (set.auto_install.load()) {
-            // Auto-install ON : Pas de Rinstall (9 éléments : 0 à 6 = groupes, 7 = Queue, 8 = Settings)
             l->item_c = 9;
             new_panel_text[0][7] = getLangSTR(QUEUE);
             new_panel_text[0][8] = getLangSTR(SETTINGS);
         } else {
-            // Auto-install OFF : Avec Rinstall (10 éléments : 0 à 6 = groupes, 7 = Rinstall, 8 = Queue, 9 = Settings)
             l->item_c = 10;
             new_panel_text[0][7] = getLangSTR(RINSTALL);
             new_panel_text[0][8] = getLangSTR(QUEUE);
             new_panel_text[0][9] = getLangSTR(SETTINGS);
+        }
+
+        for (int i = 0; i < 7; i++) {
+            new_panel_text[0][i] = group_label[i];
         }
 
         log_info("layout_dispatch_O %i", l->item_c);
