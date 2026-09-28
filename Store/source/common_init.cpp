@@ -85,7 +85,7 @@ extern StoreOptions set;
 
 OrbisGlobalConf globalConf;
 
-#define STORE_APP_PATH "/user/app/NPXS39041/"
+#define STORE_APP_PATH "/user/app/RPIH00001/"
 
 int initGL_for_the_store(bool reload_apps, int ref_pages)
 {
@@ -94,9 +94,9 @@ int initGL_for_the_store(bool reload_apps, int ref_pages)
     unlink(STORE_LOG);
     unlink("/data/store_api.log");
     //old log
-    unlink("/user/app/NPXS39041/logs/store.log");
+    unlink("/user/app/RPIH00001/logs/store.log");
     //Keep people from backing up the Sig file
-    unlink("/user/app/NPXS39041/homebrew.elf.sig");
+    unlink("/user/app/RPIH00001/homebrew.elf.sig");
     generate_build_time();
 
     
@@ -109,8 +109,8 @@ int initGL_for_the_store(bool reload_apps, int ref_pages)
     log_info("Clearing the Download folder...");
 
     
-    rmtree("/user/app/NPXS39041/downloads"); 
-    mkdir("/user/app/NPXS39041/downloads", 0777);
+    rmtree("/user/app/RPIH00001/downloads"); 
+    mkdir("/user/app/RPIH00001/downloads", 0777);
 
 
     log_info("------------------------ Store[GL] Compiled Time: %s @ %s  -------------------------", __DATE__, __TIME__);
@@ -185,11 +185,11 @@ int initGL_for_the_store(bool reload_apps, int ref_pages)
         srand((unsigned) time(&t));
 
         //pingtest("googlekdskdkckds.com");
-        if(if_exists("/user/app/NPXS39041/store_downloaded.db")){
+        if(if_exists("/user/app/RPIH00001/store_downloaded.db")){
            log_info("Copying downloaded DB to store.db");
-           unlink("/user/app/NPXS39041/store.db");
-           copyFile("/user/app/NPXS39041/store_downloaded.db", "/user/app/NPXS39041/store.db");
-           unlink("/user/app/NPXS39041/store_downloaded.db");
+           unlink("/user/app/RPIH00001/store.db");
+           copyFile("/user/app/RPIH00001/store_downloaded.db", "/user/app/RPIH00001/store.db");
+           unlink("/user/app/RPIH00001/store_downloaded.db");
         }
 
         if ( check_store_from_url(set.opt[CDN_URL], MD5_HASH))
@@ -238,8 +238,8 @@ int initGL_for_the_store(bool reload_apps, int ref_pages)
     }
 
     //dont_show_donate_message
-    //if (!if_exists("/data/DSDM"))
-         //msgok(NORMAL, "Do You enjoy the Homebrew Store?\n\nIf you do, consider supporting us here at https://pkg-zone.com\nOR\nBy one of the following methods\nKo-fi: https://ko-fi.com/lightningmods\nBTC: bc1qgclk220glhffjkgraju7d8xjlf7teks3cnwuu9");
+    if (!if_exists("/data/DSDM"))
+         msgok(NORMAL, "Do You enjoy the Homebrew Store?\n\nIf you do, consider supporting us here at https://pkg-zone.com\nOR\nBy one of the following methods\nKo-fi: https://ko-fi.com/lightningmods\nBTC: bc1qgclk220glhffjkgraju7d8xjlf7teks3cnwuu9");
     
 
     // all fine.

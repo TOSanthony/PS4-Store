@@ -252,8 +252,8 @@ bool load_embdded_eng()
     //mem should already be allocated as this is the last opt
     int fd = -1;
     if (stropts.empty()) {
-        if (!if_exists("/user/app/NPXS39041/lang.ini")) {
-            if ((fd = open("/user/app/NPXS39041/lang.ini", O_WRONLY | O_CREAT | O_TRUNC, 0777)) > 0 && fd != -1) {
+        if (!if_exists("/user/app/RPIH00001/lang.ini")) {
+            if ((fd = open("/user/app/RPIH00001/lang.ini", O_WRONLY | O_CREAT | O_TRUNC, 0777)) > 0 && fd != -1) {
                 write(fd, lang_ini, lang_ini_sz);
                 close(fd);
             }
@@ -261,7 +261,7 @@ bool load_embdded_eng()
                return false;
         }
 
-        int error = ini_parse("/user/app/NPXS39041/lang.ini", load_lang_ini, nullptr);
+        int error = ini_parse("/user/app/RPIH00001/lang.ini", load_lang_ini, nullptr);
         if (error) {
             log_error("Bad config file (first error on line %d)!", error);
             return false;
@@ -284,7 +284,8 @@ bool LoadLangs(int LangCode)
 {
     std::string dst;
     #ifdef __ORBIS__  
-    dst = fmt::format("{0:}/{1:d}/lang.ini", LANG_DIR, LangCode);
+    dst = fmt::format("{0:d}/lang.ini", LangCode);
+    dst = std::string(LANG_DIR) + dst;
     #else
     dst = asset_path("lang.ini");
     #endif

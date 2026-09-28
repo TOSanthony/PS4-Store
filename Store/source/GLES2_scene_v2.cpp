@@ -298,10 +298,10 @@ void GLES2_scene_init(int w, int h)
     if (!fallback_t)
     {
         if(!if_exists(asset_path("load.png"))){
-           if (if_exists("/user/appmeta/NPXS39041/icon0.png"))
-               fallback_t = load_png_asset_into_texture("/user/appmeta/NPXS39041/icon0.png");
+           if (if_exists("/user/appmeta/RPIH00001/icon0.png"))
+               fallback_t = load_png_asset_into_texture("/user/appmeta/RPIH00001/icon0.png");
            else
-              fallback_t = load_png_asset_into_texture("/user/appmeta/external/NPXS39041/icon0.png");
+              fallback_t = load_png_asset_into_texture("/user/appmeta/external/RPIH00001/icon0.png");
         }
         else
           fallback_t = load_png_asset_into_texture(asset_path("load.png"));
@@ -343,7 +343,7 @@ void GLES2_scene_init(int w, int h)
     log_info("game: %i back %i", games[0].token_c, games.size() - 1);
 
     // flag as to show it
-    icon_panel->is_shown = 0;
+    icon_panel->is_shown = 1;
     // set max_pages
     icon_panel->page_sel.y = icon_panel->item_c / (icon_panel->fieldsize.x * icon_panel->fieldsize.y);
 
@@ -519,12 +519,7 @@ void GLES2_scene_render(const char* query)
     case ON_LEFT_PANEL:
     case ON_MAIN_SCREEN:
         GLES2_render_paged_list(0); // new way: left_panel2
-
-        // --- N'afficher la grille de droite QUE SI elle est explicitement activée ---
-        if (icon_panel && icon_panel->is_shown) {
-            GLES2_render_icon_list(0);  // new way: icon_panel clone
-        }
-        
+        GLES2_render_icon_list(0);  // new way: icon_panel clone
         if(!query_ran && query && icon_panel){
             for(auto &t: icon_panel->item_d){
 
@@ -574,10 +569,7 @@ void GLES2_scene_render(const char* query)
 
     GLES2_Draw_sysinfo();
 
-    // N'afficher le titre et les textes communs de la grille que si la grille est visible
-    if (icon_panel && icon_panel->is_shown) {
-        GLES2_Draw_common_texts();
-    }
+    GLES2_Draw_common_texts();
 
     layout_refresh_VBOs();
 }
@@ -620,9 +612,9 @@ static void actions_for_settings(int action, std::shared_ptr<layout_t> &l){
         {
             //log_info("sssssss");
             loadmsg(getLangSTR(SEARCHING));
-            if(dl_from_url(fmt::format("{}/store.db", tmp), "/user/app/NPXS39041/store_downloaded.db") != 0){
+            if(dl_from_url(fmt::format("{}/store.db", tmp), "/user/app/RPIH00001/store_downloaded.db") != 0){
                 msgok(NORMAL, getLangSTR(INVAL_CDN));
-                unlink("/user/app/NPXS39041/store_downloaded.db");
+                unlink("/user/app/RPIH00001/store_downloaded.db");
                 goto error;
             }
             sceMsgDialogTerminate();
@@ -689,12 +681,12 @@ static void actions_for_settings(int action, std::shared_ptr<layout_t> &l){
             
         log_info("Settings -> Clear Cached images and content");
 
-        if (rmtree("/user/app/NPXS39041/storedata"))
+        if (rmtree("/user/app/RPIH00001/storedata"))
             msgok(NORMAL, getLangSTR(CACHE_CLEARED));
         else
             msgok(WARNING, getLangSTR(CACHE_FAILED));
 
-        mkdir("/user/app/NPXS39041/storedata", 0777);
+        mkdir("/user/app/RPIH00001/storedata", 0777);
 
         break;
     }
@@ -719,7 +711,7 @@ static void actions_for_settings(int action, std::shared_ptr<layout_t> &l){
         log_info("Settings -> Reset");
 
         set.opt[CDN_URL] = "https://api.pkg-zone.com";
-        set.opt[TMP_PATH] = "/user/app/NPXS39041/downloads";
+        set.opt[TMP_PATH] = "/user/app/RPIH00001/downloads";
         set.opt[FNT_PATH] = "/system_ex/app/NPXS20113/bdjstack/lib/fonts/SCE-PS3-RD-R-LATIN.TTF";
         
         set.auto_install = true;
@@ -850,7 +842,11 @@ install:
         {
             #ifdef __ORBIS__
             ta->is_threaded = false;
-            pkginstall(tmp.c_str(), ta, set.auto_install.load());
+            /* Use the remote URL stored in ta->url for direct BGFT install */
+            if (!ta->url.empty())
+                pkginstall_remote(ta->url.c_str(), ta, set.auto_install.load());
+            else
+                pkginstall(tmp.c_str(), ta, set.auto_install.load());
             #else
             log_info("install %s", tmp.c_str());
             // clean thread args for next job

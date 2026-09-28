@@ -832,3 +832,4 @@ void layout_refresh_VBOs(void)
         GLES2_UpdateVboForLayout(l);
     }
 }
+
