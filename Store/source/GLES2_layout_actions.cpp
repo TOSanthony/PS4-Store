@@ -282,18 +282,27 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             }
 
             // Index 7 : Queue (File d'attente)
-            if (l->curr_item == 7) {
-                menu_pos.z = ON_QUEUE;
+            if (l->curr_item == 7
+                || l->curr_item == 8)
+            {
+                if (l->f_sele == 7) menu_pos.z = ON_INSTALL;
+                else
+                    if (l->f_sele == 8) menu_pos.z = ON_QUEUE;
+                // activate and set focus
                 queue_panel_init();
-                l = queue_panel;
-                l->is_active = l->is_shown = 1;
+                l = queue_panel; // switch control
+               // l->page_sel.x = 0;
+                l->is_active =
+                    l->is_shown = 1;
+                // reset selection to first entry
+                //l->item_sel   = (ivec2) (0);
                 layout_update_fsize(l);
-                active_p = queue_panel;
+                active_p = queue_panel;  //active_p->is_shown = 1;
                 break;
             }
 
-            // Index 8 : Settings (Paramètres)
-            if (l->curr_item == 8) {
+            // Index 9 : Settings (Paramètres)
+            if (l->curr_item == 9) {
                 menu_pos.z = ON_SETTINGS;
                 active_p = option_panel;
                 active_p->is_shown = 1;
@@ -533,9 +542,17 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
     }
     else if (l == queue_panel || l == option_panel)
     {
+        //menu_pos.z = ON_LEFT_PANEL;
+        //active_p = left_panel2;
+        //active_p->page_sel.x = 0;
+        
         menu_pos.z = ON_LEFT_PANEL;
-        active_p = left_panel2;
-        active_p->page_sel.x = 0;
+        active_p = left_panel2; // Retour au panneau de gauche
+        left_panel2->page_sel.x = 0; // Retour à la page principale
+        left_panel2->is_shown = 1;
+        queue_panel->is_shown = 0;
+        option_panel->is_shown = 0;
+        layout_update_sele(left_panel2, 0);
     }
     else if ( l == download_panel)
     {
