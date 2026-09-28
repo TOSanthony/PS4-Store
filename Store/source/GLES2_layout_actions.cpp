@@ -17,6 +17,7 @@
 
 
 extern std::vector<std::string> download_panel_text;
+extern std::vector<std::string> group_label; // <-- Ajoute cette ligne
 extern bool unsafe_source;
 int DL_CO = -999;
 // related indexes from json.h enum
