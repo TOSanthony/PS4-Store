@@ -276,24 +276,28 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             }
 
             // Détermination dynamique des index selon auto_install
-            int rinstall_idx = -1;
-            int queue_idx = 7;
-            int updates_idx = 8;
-            int settings_idx = 9;
+            //int rinstall_idx = -1;
+            //int queue_idx = 7;
+            //int updates_idx = 8;
+            //int settings_idx = 9;
 
-            if (!set.auto_install.load()) {
+            //if (!set.auto_install.load()) {
                 // Si auto_install est OFF, RINSTALL est présent à l'index 7
-                rinstall_idx = 7;
-                queue_idx = 8;
-                updates_idx = 9;
-                settings_idx = 10;
-            } else {
+                //rinstall_idx = 7;
+                //queue_idx = 8;
+                //updates_idx = 9;
+                //settings_idx = 10;
+           //} else {
                 // Si auto_install est ON, pas de RINSTALL, Queue passe à 7
-                queue_idx = 7;
-                updates_idx = 8;
-                settings_idx = 9;
+                //queue_idx = 7;
+                //updates_idx = 8;
+                //settings_idx = 9;
             }
 
+            int rinstall_idx = 7;
+            int queue_idx = 8;
+            int settings_idx = 9;
+            
             if (rinstall_idx != -1 && l->curr_item == rinstall_idx) {
                 // Ready to install
                 menu_pos.z = ON_INSTALL;
