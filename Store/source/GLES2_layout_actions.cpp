@@ -294,12 +294,12 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             }
 
             // variable length lists
-            if (l->curr_item == 3
-                || l->curr_item == 4)
+            if (l->curr_item == 6
+                || l->curr_item == 7)
             {
-                if (l->f_sele == 3) menu_pos.z = ON_INSTALL;
+                if (l->f_sele == 6) menu_pos.z = ON_INSTALL;
                 else
-                    if (l->f_sele == 4) menu_pos.z = ON_QUEUE;
+                    if (l->f_sele == 7) menu_pos.z = ON_QUEUE;
                 // activate and set focus
                 queue_panel_init();
                 l = queue_panel; // switch control
@@ -334,7 +334,7 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 break;
             }
 
-            if (l->curr_item == 6) {
+            if (l->curr_item == 8) {
                 menu_pos.z = ON_SETTINGS;
                 active_p = option_panel;  //active_p->is_shown = 1;
             }
@@ -566,11 +566,21 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
     if (l == left_panel2)
     {
         left_panel2->mtx.lock();
-        l->page_sel.x = 0, // back initial page
-            l->vbo_s = ASK_REFRESH;
-        l->item_c = 7, // num of texts
-            l->curr_item = 0;
-            log_info("layout_dispatch_O %i", l->item_c);
+        l->page_sel.x = 0; // back initial page
+        l->vbo_s = ASK_REFRESH;
+        l->item_c = 9;     // num of texts
+        l->curr_item = 0;
+
+        // MISE À JOUR DYNAMIQUE DES COMPTEURS DE GROUPES ICI :
+        for (int i = 0; i < 7; i++) {
+            int count = 0;
+            if (groups.size() > (i + 1)) {
+                count = groups[i + 1].token_c;
+            }
+            new_panel_text[0][i] = fmt::format("{} ({})", group_label[i], count);
+        }
+
+        log_info("layout_dispatch_O %i", l->item_c);
         layout_fill_item_from_list(l, new_panel_text[l->page_sel.x]);
         layout_update_sele(l, 0);
         left_panel2->mtx.unlock();
