@@ -17,7 +17,6 @@
 
 
 extern std::vector<std::string> download_panel_text;
-extern std::vector<std::string> group_label;
 extern bool unsafe_source;
 int DL_CO = -999;
 // related indexes from json.h enum
@@ -27,7 +26,7 @@ sort_patterns[11] = { 0, 1, 4, 5, 9, 10, 11, 12, 13, 16, 16 };
 
 /* set comparison token */
 void set_cmp_token(const int index)
-{
+{    //cmp_token = index;
     cmp_token = sort_patterns[index];
 }
 
@@ -35,7 +34,6 @@ void set_cmp_token(const int index)
 static enum token_name label;
 
 extern std::atomic_bool is_icons_finished;
-extern std::atomic_bool icons_thread_started; // <-- Ajoute cette ligne
 
 void Install_View(std::shared_ptr<layout_t>  &l, const char* query_string, enum token_name nm)
 {
@@ -266,67 +264,90 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
         {
         case 0: // first page
         {
-            // Les 7 groupes (0 à 6)
-            if (l->curr_item >= 0 && l->curr_item <= 6) {
-                int group_index = l->curr_item;
-                aux = groups[group_index + 1].token_d;
-                aux[0].len = groups[group_index + 1].token_c;
-
-                if (!aux.empty() && aux[0].len) {
-                    menu_pos.z = ON_MAIN_SCREEN;
-                    l = active_p = icon_panel;
+            if (l->curr_item == 0) {
+                menu_pos.z = ON_MAIN_SCREEN;
+                // set left_panel 2nd page
+                l->page_sel.x = 1,
+                    l->item_c = 3,
                     l->curr_item = 0;
-                    l->item_c = aux[0].len;
-                    layout_update_sele(l, 0);
-                }
+                layout_fill_item_from_list(l, new_panel_text[l->page_sel.x]);
+                layout_update_sele(l, 0);
+                active_p = icon_panel;
                 break;
             }
 
-            // Si auto_install est OFF (10 éléments)
-            if (!set.auto_install.load()) {
-                if (l->curr_item == 7) { // Rinstall
-                    menu_pos.z = ON_INSTALL;
-                    queue_panel_init();
-                    l = queue_panel;
-                    l->is_active = l->is_shown = 1;
-                    layout_update_fsize(l);
-                    active_p = queue_panel;
-                    break;
-                }
-                if (l->curr_item == 8) { // Queue
-                    menu_pos.z = ON_QUEUE;
-                    queue_panel_init();
-                    l = queue_panel;
-                    l->is_active = l->is_shown = 1;
-                    layout_update_fsize(l);
-                    active_p = queue_panel;
-                    break;
-                }
-                if (l->curr_item == 9) { // Settings
-                    menu_pos.z = ON_SETTINGS;
-                    active_p = option_panel;
-                    active_p->is_shown = 1;
-                    break;
-                }
-            } 
-            else { // Si auto_install est ON (9 éléments, pas de Rinstall)
-                if (l->curr_item == 7) { // Queue
-                    menu_pos.z = ON_QUEUE;
-                    queue_panel_init();
-                    l = queue_panel;
-                    l->is_active = l->is_shown = 1;
-                    layout_update_fsize(l);
-                    active_p = queue_panel;
-                    break;
-                }
-                if (l->curr_item == 8) { // Settings
-                    menu_pos.z = ON_SETTINGS;
-                    active_p = option_panel;
-                    active_p->is_shown = 1;
-                    break;
-                }
+            if (l->curr_item == 1) {
+                menu_pos.z = ON_MAIN_SCREEN;
+                Install_View(l, "Itemzflow", NAME);
+                break;
             }
 
+            // 2 Groups
+            if (l->curr_item == 2) {
+                // set left_panel 3nd page
+                l->page_sel.x = 2,
+                l->item_c = groups[0].token_c;
+                l->curr_item = 0;
+                layout_update_sele(l, 0);
+                active_p = left_panel2;
+                break;
+            }
+
+            // variable length lists
+            if (l->curr_item == 3
+                || l->curr_item == 4)
+            {
+                if (l->f_sele == 3) menu_pos.z = ON_INSTALL;
+                else
+                    if (l->f_sele == 4) menu_pos.z = ON_QUEUE;
+                // activate and set focus
+                queue_panel_init();
+                l = queue_panel; // switch control
+               // l->page_sel.x = 0;
+                l->is_active =
+                    l->is_shown = 1;
+                // reset selection to first entry
+                //l->item_sel   = (ivec2) (0);
+                layout_update_fsize(l);
+                active_p = queue_panel;  //active_p->is_shown = 1;
+                break;
+            }
+
+            // 5 Updates (todo)
+            if (l->curr_item == 5) {
+                 if(!unsafe_source){
+                    if(update_check_finised){
+                       Update_View(l);
+                    }
+                    else{
+                          //msgok(WARNING, "Please wait for the update check to finish");
+                          left_panel2->mtx.unlock();
+                           #ifdef __ORBIS__
+                          if(options_dialog(getLangSTR(UPDATES_STILL_LOADING), getLangSTR(SHOW_PROG), getLangSTR(STAY_IN_BACKGROUND)) == 1){
+                            progstart(getLangSTR(CHECKING_FOR_UPDATES));
+                            show_prog = true;
+                            while(show_prog.load()){
+                                usleep(100000);
+
+                            }
+                          }
+                          #endif
+                    }
+                 }
+                 else{
+                    #ifdef __ORBIS__
+                    msgok(WARNING, "The Updates feature is not available on Unsafe CDNs");
+                    #endif
+                    log_info("unsafe source, skip update");
+                 }
+                break;
+            }
+
+            if (l->curr_item == 6) {
+                menu_pos.z = ON_SETTINGS;
+                active_p = option_panel;  //active_p->is_shown = 1;
+            }
+            // set status
             active_p->is_shown = 1;
         } 
         break;
@@ -337,6 +358,7 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             {
                 memset(&pattern[0], 0, sizeof(pattern));
                 log_info("execute openDialogForSearch()");
+                // get char *pattern
                 if(!Keyboard("Store Keyboard", "", &pattern[0], false)) goto cancel_kb_search;
 
                 log_info("@@@@@@@@@  Search for: %s", pattern);
@@ -345,6 +367,7 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
 
             search_by_label:
                 destroy_item_t(q);
+                // build an array of search results
                 pattern_str = pattern;
                 log_info("Searching for '%s' ...", pattern_str.c_str());
                 q = search_item_t(icon_panel->item_d,
@@ -353,17 +376,22 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
 
             wen_found_hit:
 
-                if (!aux.empty() && aux[0].len)
+                if (!aux.empty() && aux[0].len) // we got results, address aux!
                 {
                     log_info("Showing %d items for '%s' @ %p", aux[0].len, aux[0].off.c_str(), &aux);
+                    //  for(int i = 0; i < aux[0].len; i++) { log_info("%d: %s %d", i, aux[i].off, aux[i].len); }
+                    // switch focus
                     menu_pos.z = ON_MAIN_SCREEN;
                     l = active_p = icon_panel;
+                    // reset selection to first entry
                     l->curr_item = 0;
                     l->item_c = aux[0].len;
                     layout_update_sele(l, 0);
+                    // but now we have aux array!
                 }
                 else
                 {
+
                     #ifdef __ORBIS__
                     sceKernelIccSetBuzzer(3);
                     #endif
@@ -376,22 +404,25 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             }
 
             if (l->curr_item == 1)  /* switch to Sort labels */
-            {
+            {   // set left_panel 4th page
                 l->page_sel.x = 3,
                     l->item_c = 11;
                 active_p = left_panel2;
+
                 goto switch_page;
             }
-
+            // filter
             if (l->curr_item == 2)  /* switch to Filter_by */
-            {
+            {   // set left_panel 5th page
                 l->page_sel.x = 4,
                     l->item_c = 2;
                 active_p = left_panel2;
             switch_page:
                 l->curr_item = 0;
                 layout_fill_item_from_list(l, new_panel_text[l->page_sel.x]);
+
                 layout_update_sele(l, 0);
+
                 goto refresh_active_panel;
             }
 
@@ -399,8 +430,10 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
 
         case 2: // on Groups page
         {
+            // map aux AOS to selected group
             aux = groups[l->curr_item + 1].token_d;
             aux[0].len = groups[l->curr_item + 1].token_c;
+
             goto wen_found_hit;
         } break;
 
@@ -409,6 +442,9 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             icon_panel->mtx.lock();
             log_info("l->curr_item) %i", l->curr_item);
             set_cmp_token(l->curr_item);
+            /* resort using custom comparision function */
+            //qsort(icon_panel->item_d.data(), icon_panel->item_d.size(), sizeof(item_t), struct_cmp_by_token);
+            // Sort using custom comparison function
             icon_panel->item_d.resize(icon_panel->item_c);
             std::sort(icon_panel->item_d.begin(), icon_panel->item_d.end(),
               [](const item_t& a, const item_t& b) {
@@ -416,11 +452,15 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                      log_error("a or b is empty");
                      return false;
                   }
+                  // Replace this condition with your custom comparison logic
                    return a.token_d[cmp_token].off.compare(b.token_d[cmp_token].off) < 0;
               });
 
+            // refresh Groups item_idx_t* array
             recreate_item_t(groups);
-            menu_pos.z = ON_MAIN_SCREEN;
+            // switch focus, set back Games view
+            menu_pos.z = ON_MAIN_SCREEN;   // switch view
+            // reset selection to first entry
             icon_panel->curr_item = 0;
             layout_update_sele(icon_panel, 0);
             active_p = icon_panel;
@@ -429,12 +469,15 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
 
         case 4: // on Filter_by page
         {
+            // update current label context
             switch (l->curr_item)
             {
-            case 0:  label = PV;     break;
+            case 0:  label = PV;      break;
             case 1:  label = AUTHOR;  break;
             }
+            // build_list of patterns found
             std::vector<item_idx_t> ret = build_item_list(icon_panel->item_d, label);
+            /* resort using custom comparision function */
             std::sort(ret.begin(), ret.end(), [](const item_idx_t& a, const item_idx_t& b) {
                      return b.len < a.len;
             });
@@ -442,30 +485,37 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
             l->page_sel.x = 5,
                 l->item_c = ret.size();
             l->curr_item = 0;
+             // build_list of patterns found
             std::vector<item_idx_t> tmp_ret = build_item_list(icon_panel->item_d, label);
+            /* resort using custom comparision function */
             std::sort(tmp_ret.begin(), tmp_ret.end(), [](const item_idx_t& a, const item_idx_t& b) {
                      return b.len < a.len;
             });
             l->page_sel.x = 5,
             l->item_c = tmp_ret.size();
             l->curr_item = 0;
+            // build the char array for next call below
             std::vector<std::string> data;
             build_char_from_items(data, tmp_ret);
+            // point to this item_idx_t* AOS
             l->item_d[0].token_d = tmp_ret;
             layout_fill_item_from_list(l, data);
             layout_update_sele(l, 0);
             active_p = left_panel2;
+           // free(tmp);
+            // fixme: not finished, we are leaking tmp and ret !!!
         } break;
 
         case 5: // execute Filter_by selection
         {
+            // search for label and token_data
             snprintf(&pattern[0], 69, "%s", l->item_d[l->curr_item].token_d[0].off.c_str());
             goto search_by_label;
         }
 
         } // End switch
 
-        l->vbo_s = ASK_REFRESH;
+        l->vbo_s = ASK_REFRESH; // ask to refresh VBO
 
     refresh_active_panel:
 
@@ -478,10 +528,15 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
     }
     if (l == icon_panel) // go to download_panel
     {
+        // set to current selected
         l->curr_item = idx;
+        // but don't refresh indexes
 
     switch_to_download:
         loadmsg(getLangSTR(DL_CACHE));
+        //Check if Legacy is Enabled then check DL Counter for APP DL Page
+        //if(li->token_d) TID_VAILD
+        //CheckUpdate(l->item_d[l->curr_item].token_d[ ID ].off.c_str(), l->item_d[l->curr_item]);
         if (TID_VAILD)
         { 
             DL_CO = PENDING_DOWNLOADS;
@@ -501,32 +556,30 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                 download_panel->item_d[0].token_d[0].off = download_panel_text[0] = getLangSTR(REINSTALL_APP);
         }
         else if (games[idx].update_status == APP_NOT_INSTALLED){
-                download_panel_text[0] = set.auto_install.load() ? getLangSTR(DL_AND_IN) : getLangSTR(DL2);
+                download_panel->item_d[0].token_d[0].off = download_panel_text[0] = set.auto_install.load() ? getLangSTR(DL_AND_IN) : getLangSTR(DL2);
         }
         icon_panel->mtx.unlock();
         goto refresh_active_panel;
     }
 
-    if (l == download_panel || l == option_panel)
+    if (l == download_panel  // trigger item download
+        || l == option_panel) // execute action
     {
         X_action_dispatch(l->f_sele, l);
         return;
     }
 }
+
 void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
 {
     if (l == left_panel2)
     {
         left_panel2->mtx.lock();
-        l->page_sel.x = 0;
-        l->vbo_s = ASK_REFRESH;
-        l->curr_item = 0;
-
-        for (int i = 0; i < 7; i++) {
-            new_panel_text[0][i] = group_label[i];
-        }
-
-        log_info("layout_dispatch_O %i", l->item_c);
+        l->page_sel.x = 0, // back initial page
+            l->vbo_s = ASK_REFRESH;
+        l->item_c = 7, // num of texts
+            l->curr_item = 0;
+            log_info("layout_dispatch_O %i", l->item_c);
         layout_fill_item_from_list(l, new_panel_text[l->page_sel.x]);
         layout_update_sele(l, 0);
         left_panel2->mtx.unlock();
@@ -591,6 +644,7 @@ void layout_dispatch_O(std::shared_ptr<layout_t>  &l)
 /* deal with menu position / actions */
 void GLES2_scene_on_pressed_button(int button)
 {
+
     if (!active_p)
          active_p = left_panel2;
 
@@ -598,28 +652,49 @@ void GLES2_scene_on_pressed_button(int button)
 
     auto &l = active_p;
 
+    //  log_debug( "%s, l:%p", __FUNCTION__, l);
+
     switch (button)
     {
-    case LEF:  layout_update_sele(l, -1); break;
+    case LEF:  layout_update_sele(l, -1); break; // l_or_r
     case RIG:  layout_update_sele(l, +1); break;
-    case UP:   layout_update_sele(l, -l->fieldsize.x); break;
+    case UP:  layout_update_sele(l, -l->fieldsize.x); break;
     case DOW:  layout_update_sele(l, +l->fieldsize.x); break;
-    case TRI:  break;
-    case CIR:  layout_dispatch_O(l); break;
-    case CRO:  layout_dispatch_X(l); break;
+
+    case TRI: { /* go cf */
+        //menu_pos.z = ON_ITEMzFLOW;  active_p = NULL;
+        //drop_all_icons();
+    } break;
+
+    case CIR: { // back
+        layout_dispatch_O(l);
+    } break;
+
+    case CRO: { // execute action
+        layout_dispatch_X(l);
+    } break;
+
+        // we don't catch button for migration, fallbak old way
     default: return;
     }
 
     log_debug("%s, %d/%d", __FUNCTION__, l->curr_item + 1, l->item_c);
+
     GLES2_refresh_common();
 }
 
+
 void GLES2_Refresh_for_settings()
 {
+
     left_panel2->mtx.lock();
     if (!active_p) active_p = left_panel2;
+
     GLES2_refresh_sysinfo();
+
     layout_update_sele(active_p, 0);
+
     GLES2_refresh_common();
     left_panel2->mtx.unlock();
 }
+
