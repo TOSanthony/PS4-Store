@@ -52,7 +52,7 @@ void GLES2_render_paged_list(int unused)
 {
     std::shared_ptr<layout_t>  &l = left_panel2;
     std::vector<vec4> rr;
-    vec4 r = (vec4) { -.985, -.100,   -.505, -.105 };
+    //vec4 r = (vec4) { -.985, -.100,   -.505, -.105 };
 
     if(!l.get() || l->item_d.empty() )
     {   
@@ -96,12 +96,12 @@ void GLES2_render_paged_list(int unused)
         log_info("%s: %p %p %p - Combined menu with %d items", __FUNCTION__, left_panel2.get(), active_p.get(), l.get(), res);
     }
     
-    if(active_p == left_panel2 &&  l->page_sel.x == ON_MAIN_SCREEN){
+    /*if(active_p == left_panel2 &&  l->page_sel.x == ON_MAIN_SCREEN){
         rr.push_back(r);
         ORBIS_RenderFillRects(USE_COLOR, grey, rr, 1);
         GLES2_DrawFillingRect(rr, white, updates_prog.load());
         rr.clear();
-    }
+    }*/
 
    if(1)
       GLES2_render_layout_v2(l, 0);
