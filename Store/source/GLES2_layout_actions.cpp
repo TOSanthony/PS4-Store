@@ -282,11 +282,11 @@ static void layout_dispatch_X(std::shared_ptr<layout_t>  &l)
                     l->item_c = aux[0].len;
                     
                     // Afficher la grille de droite
-                    icon_panel->is_shown = 1; 
+                    //icon_panel->is_shown = 1; 
 
                     // Forcer le chargement/rafraîchissement des icônes
-                    is_icons_finished = true;
-                    icons_thread_started = false;
+                    //is_icons_finished = true;
+                    //icons_thread_started = false;
                     l->vbo_s = ASK_REFRESH;
                     
                     layout_update_sele(l, 0);
