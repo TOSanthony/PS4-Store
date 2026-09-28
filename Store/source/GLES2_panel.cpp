@@ -323,6 +323,10 @@ void GLES2_Draw_sysinfo(void)
         //strftime(time_str.data(), time_str.size(), "%A, %B %e %Y, %H:%M", tm); // custom date string
         //tmp = time_str.data();
 
+        /* Définir explicitement le fuseau horaire pour la France (CET/CEST) */
+        setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 1);
+        tzset(); // Met à jour les règles de fuseau horaire du système
+        
         /* get systime */
         time_t     t   = time(NULL);
         struct tm *tm = localtime(&t);
