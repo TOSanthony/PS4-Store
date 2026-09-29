@@ -285,6 +285,10 @@ bool LoadLangs(int LangCode)
     std::string dst;
     #ifdef __ORBIS__  
     dst = fmt::format("{0:}/{1:d}/lang.ini", LANG_DIR, LangCode);
+
+    // AJOUTEZ CETTE LIGNE DE LOG :
+    log_info("--> Langue active chargée depuis le dossier LangCode : %d (Chemin : %s)", LangCode, dst.c_str());
+    
     #else
     dst = asset_path("lang.ini");
     #endif
