@@ -19,6 +19,14 @@
     <file targ_path="assets/fonts/HelveticaWorld-Multi.ttf" orig_path="../App Media-Assets/assets/fonts/HelveticaWorld-Multi.ttf" />
     <file targ_path="assets/fonts/NotoSansJP-Regular.ttf" orig_path="../App Media-Assets/assets/fonts/NotoSansJP-Regular.ttf" />
     <file targ_path="assets/fonts/NotoSansKR-Regular.ttf" orig_path="../App Media-Assets/assets/fonts/NotoSansKR-Regular.ttf" />
+    <file targ_path="assets/app.png" orig_path="../App Media-Assets/assets/app.png" />
+    <file targ_path="assets/dlc.png" orig_path="../App Media-Assets/assets/dlc.png" />
+    <file targ_path="assets/game.png" orig_path="../App Media-Assets/assets/game.png" />
+    <file targ_path="assets/other.png" orig_path="../App Media-Assets/assets/other.png" />
+    <file targ_path="assets/patch.png" orig_path="../App Media-Assets/assets/patch.png" />
+    <file targ_path="assets/settings.png" orig_path="../App Media-Assets/assets/settings.png" />
+    <file targ_path="assets/theme.png" orig_path="../App Media-Assets/assets/theme.png" />
+    <file targ_path="assets/unknown.png" orig_path="../App Media-Assets/assets/unknown.png" />
     <file targ_path="assets/load.png" orig_path="../App Media-Assets/assets/load.png" />
     <file targ_path="langs/0/lang.ini" orig_path="../App Media-Assets/langs/0/lang.ini" />
     <file targ_path="langs/1/lang.ini" orig_path="../App Media-Assets/langs/1/lang.ini" />
@@ -56,14 +64,6 @@
     <file targ_path="Media/settings.ini" orig_path="../App Media-Assets/Media/settings.ini" />
     <file targ_path="eboot.bin" orig_path="../Store-Loader/eboot.bin" />
     <file targ_path="homebrew.elf" orig_path="homebrew.elf" />
-    <file targ_path="assets/category_icons/game.png" orig_path="../App Media-Assets/category_icons/game.png" />
-    <file targ_path="assets/category_icons/patch.png" orig_path="../App Media-Assets/category_icons/patch.png" />
-    <file targ_path="assets/category_icons/dlc.png" orig_path="../App Media-Assets/category_icons/dlc.png" />
-    <file targ_path="assets/category_icons/theme.png" orig_path="../App Media-Assets/category_icons/theme.png" />
-    <file targ_path="assets/category_icons/app.png" orig_path="../App Media-Assets/category_icons/app.png" />
-    <file targ_path="assets/category_icons/unknown.png" orig_path="../App Media-Assets/category_icons/unknown.png" />
-    <file targ_path="assets/category_icons/other.png" orig_path="../App Media-Assets/category_icons/other.png" />
-    <file targ_path="assets/category_icons/settings.png" orig_path="../App Media-Assets/category_icons/settings.png" />
   </files>
   <rootdir>
     <dir targ_name="sce_sys" />
