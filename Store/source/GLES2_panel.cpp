@@ -25,16 +25,28 @@ extern vec2 resolution;
 extern bool unsafe_source;
 
 
-const char* group_labels_non_pkg_zone[] =
-{   // 0 is reserved index for: (label, total count)
-    "Jeux",
-    "Patch",
-    "DLC",
-    "Theme",
-    "App",
-    "Unknown",
-    "Other"
-};
+//const char* group_labels_non_pkg_zone[] =
+//{   // 0 is reserved index for: (label, total count)
+    //"Game",
+    //"Patch",
+    //"DLC",
+    //"Theme",
+    //"App",
+    //"Unknown",
+    //"Other"
+//};
+
+const char* group_labels_non_pkg_zone[7];
+
+void init_group_labels() {
+    group_labels_non_pkg_zone[0] = getLangSTR("GROUP_GAMES") ? getLangSTR("GROUP_GAMES") : "Game";
+    group_labels_non_pkg_zone[1] = getLangSTR("GROUP_UPDATES") ? getLangSTR("GROUP_UPDATES") : "Patch";
+    group_labels_non_pkg_zone[2] = getLangSTR("GROUP_DLC") ? getLangSTR("GROUP_DLC") : "DLC";
+    group_labels_non_pkg_zone[3] = getLangSTR("GROUP_THEME") ? getLangSTR("GROUP_THEME") : "Theme";
+    group_labels_non_pkg_zone[4] = getLangSTR("GROUP_APP") ? getLangSTR("GROUP_APP") : "App";
+    group_labels_non_pkg_zone[5] = getLangSTR("GROUP_UNKNOWN") ? getLangSTR("GROUP_UNKNOWN") : "Unknown";
+    group_labels_non_pkg_zone[6] = getLangSTR("GROUP_OTHER") ? getLangSTR("GROUP_OTHER") : "Other";
+}
 
 extern std::atomic_bool is_icons_finished, icons_thread_started;
 
