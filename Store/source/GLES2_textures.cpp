@@ -101,19 +101,19 @@ void on_GLES2_Init_icons(int view_w, int view_h)
     
     category_icons[0] = load_png_asset_into_texture("/mnt/sandbox/pfsmnt/NPXS39041-app0/assets/game.png");
     log_info("game icon = %u", category_icons[0]);
-    category_icons[1] = load_png_asset_into_texture("assets/patch.png");
+    category_icons[1] = load_png_asset_into_texture("/mnt/sandbox/pfsmnt/NPXS39041-app0/assets/patch.png");
     log_info("game icon = %u", category_icons[1]);
-    category_icons[2] = load_png_asset_into_texture("assets/dlc.png");
+    category_icons[2] = load_png_asset_into_texture("/mnt/sandbox/pfsmnt/NPXS39041-app0/assets/dlc.png");
     log_info("game icon = %u", category_icons[2]);
-    category_icons[3] = load_png_asset_into_texture("assets/theme.png");
+    category_icons[3] = load_png_asset_into_texture("/mnt/sandbox/pfsmnt/NPXS39041-app0/assets/theme.png");
     log_info("game icon = %u", category_icons[3]);
-    category_icons[4] = load_png_asset_into_texture("assets/app.png");
+    category_icons[4] = load_png_asset_into_texture("/mnt/sandbox/pfsmnt/NPXS39041-app0/assets/app.png");
     log_info("game icon = %u", category_icons[4]);
-    category_icons[5] = load_png_asset_into_texture("assets/unknown.png");
+    category_icons[5] = load_png_asset_into_texture("/mnt/sandbox/pfsmnt/NPXS39041-app0/assets/unknown.png");
     log_info("game icon = %u", category_icons[5]);
-    category_icons[6] = load_png_asset_into_texture("assets/other.png");
+    category_icons[6] = load_png_asset_into_texture("/mnt/sandbox/pfsmnt/NPXS39041-app0/assets/other.png");
     log_info("game icon = %u", category_icons[6]);
-    category_icons[7] = load_png_asset_into_texture("assets/settings.png");
+    category_icons[9] = load_png_asset_into_texture("/mnt/sandbox/pfsmnt/NPXS39041-app0/assets/settings.png");
     log_info("game icon = %u", category_icons[7]);
     
     glViewport(0, 0, view_w, view_h);
