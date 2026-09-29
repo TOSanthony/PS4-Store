@@ -175,7 +175,7 @@ static void layout_compose_text(std::shared_ptr<layout_t> &l, int idx, vec2 &pen
             {  
                 left_panel2->mtx.lock();      
                 tmp = fmt::format(format, data);
-                pen.x += 40;
+                pen.x += 42;
                 
                 if (l->page_sel.x != 3)
                     is_sort_panel = false;
@@ -707,16 +707,16 @@ void GLES2_render_layout_v2(std::shared_ptr<layout_t>  &l, int unused)
             for (int i = 0; i < 10; i++)
             {
                 float y = 850.0f - (i * 70.0f);
-            
+        
                 vec2 icon_p1 = {20.0f, y};
                 vec2 icon_p2 = {52.0f, y + 32.0f};
-            
+        
                 vec4 icon_rect;
-            
+        
                 icon_rect.xy = px_pos_to_normalized(&icon_p1);
                 icon_rect.zw = px_pos_to_normalized(&icon_p2);
                 icon_rect.yw = icon_rect.wy;
-            
+        
                 if (category_icons[i] != 0)
                 {
                     on_GLES2_Render_icon(
@@ -726,6 +726,30 @@ void GLES2_render_layout_v2(std::shared_ptr<layout_t>  &l, int unused)
                         icon_rect
                     );
                 }
+            }
+        
+            /* redessine l'icône sélectionnée par-dessus le rectangle */
+            int sel = l->curr_item;
+        
+            if (sel >= 0 && sel < 10 && category_icons[sel] != 0)
+            {
+                float y = 850.0f - (sel * 70.0f);
+        
+                vec2 icon_p1 = {20.0f, y};
+                vec2 icon_p2 = {52.0f, y + 32.0f};
+        
+                vec4 icon_rect;
+        
+                icon_rect.xy = px_pos_to_normalized(&icon_p1);
+                icon_rect.zw = px_pos_to_normalized(&icon_p2);
+                icon_rect.yw = icon_rect.wy;
+        
+                on_GLES2_Render_icon(
+                    USE_COLOR,
+                    category_icons[sel],
+                    2,
+                    icon_rect
+                );
             }
         }
         if(l == icon_panel)
