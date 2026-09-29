@@ -100,13 +100,21 @@ void on_GLES2_Init_icons(int view_w, int view_h)
     // reshape
     
     category_icons[0] = load_png_asset_into_texture("assets/game.png");
+    log_info("game icon = %u", category_icons[0]);
     category_icons[1] = load_png_asset_into_texture("assets/patch.png");
+    log_info("game icon = %u", category_icons[1]);
     category_icons[2] = load_png_asset_into_texture("assets/dlc.png");
+    log_info("game icon = %u", category_icons[2]);
     category_icons[3] = load_png_asset_into_texture("assets/theme.png");
+    log_info("game icon = %u", category_icons[3]);
     category_icons[4] = load_png_asset_into_texture("assets/app.png");
+    log_info("game icon = %u", category_icons[4]);
     category_icons[5] = load_png_asset_into_texture("assets/unknown.png");
+    log_info("game icon = %u", category_icons[5]);
     category_icons[6] = load_png_asset_into_texture("assets/other.png");
+    log_info("game icon = %u", category_icons[6]);
     category_icons[7] = load_png_asset_into_texture("assets/settings.png");
+    log_info("game icon = %u", category_icons[7]);
     
     glViewport(0, 0, view_w, view_h);
 }
