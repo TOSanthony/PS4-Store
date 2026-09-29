@@ -295,7 +295,7 @@ bool load_embdded_eng()
 
 #endif
 
-extern void init_group_labels();
+//extern void init_group_labels();
 
 bool LoadLangs(int LangCode)
 {
@@ -304,7 +304,7 @@ bool LoadLangs(int LangCode)
     dst = fmt::format("{0:}/{1:d}/lang.ini", LANG_DIR, LangCode);
 
     // AJOUTEZ CETTE LIGNE DE LOG :
-    log_info("--> Langue active chargée depuis le dossier LangCode : %d (Chemin : %s)", LangCode, dst.c_str());
+    //log_info("--> Langue active chargée depuis le dossier LangCode : %d (Chemin : %s)", LangCode, dst.c_str());
     
     #else
     dst = asset_path("lang.ini");
@@ -331,6 +331,6 @@ bool LoadLangs(int LangCode)
     }
 
     fill_menu_text();
-    init_group_labels();
+    //init_group_labels();
     return true;
 }
