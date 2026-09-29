@@ -704,28 +704,28 @@ void GLES2_render_layout_v2(std::shared_ptr<layout_t>  &l, int unused)
             ORBIS_RenderFillRects(USE_COLOR, grey, rr, 1);
             rr.clear();
         
-            for (int i = 0; i < l->f_size; i++)
+            for (int i = 0; i < 10; i++)
             {
-                if (i >= 10)
-                    break;
-        
                 float y = 850.0f - (i * 70.0f);
-        
+            
                 vec2 icon_p1 = {20.0f, y};
                 vec2 icon_p2 = {52.0f, y + 32.0f};
-        
+            
                 vec4 icon_rect;
-        
+            
                 icon_rect.xy = px_pos_to_normalized(&icon_p1);
                 icon_rect.zw = px_pos_to_normalized(&icon_p2);
                 icon_rect.yw = icon_rect.wy;
-        
-                on_GLES2_Render_icon(
-                    USE_COLOR,
-                    category_icons[i],
-                    2,
-                    icon_rect
-                );
+            
+                if (category_icons[i] != 0)
+                {
+                    on_GLES2_Render_icon(
+                        USE_COLOR,
+                        category_icons[i],
+                        2,
+                        icon_rect
+                    );
+                }
             }
         }
         if(l == icon_panel)
