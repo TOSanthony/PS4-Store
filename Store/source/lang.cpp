@@ -158,6 +158,17 @@ static int load_lang_ini(void *, const char *, const char *name,
 }
 
 void fill_menu_text() {
+    // Traductions par défaut pour les groupes unsafe_source
+  if (stropts[lang_key[GAME_LABEL]].empty()) {
+    stropts[lang_key[GAME_LABEL]] = "Game";
+    stropts[lang_key[PATCH_LABEL]] = "Patch";
+    stropts[lang_key[DLC_LABEL]] = "DLC";
+    stropts[lang_key[THEME_LABEL]] = "Theme";
+    stropts[lang_key[APP_LABEL]] = "App";
+    stropts[lang_key[UNKNOWN_LABEL]] = "Unknown";
+    stropts[lang_key[OTHER_LABEL]] = "Other";
+  }
+    
   //lang_key[STR_NOT_FOUND]
   if (stropts[lang_key[CANCEL]].empty()) {
     stropts[lang_key[SETTINGS_6]] = "Automatically install";
@@ -233,18 +244,15 @@ void fill_menu_text() {
   option_panel_text[9] = getLangSTR(SETTINGS_10);
   download_panel_text[2] = getLangSTR(CANCEL);
 
-  for (int i = 0; i < 7; i++) {
-    if (unsafe_source)
-        //group_label[i] = group_labels_non_pkg_zone[i];
-        group_label[0] = getLangSTR(GAME_LABEL);
-        group_label[1] = getLangSTR(PATCH_LABEL);
-        group_label[2] = getLangSTR(DLC_LABEL);
-        group_label[3] = getLangSTR(THEME_LABEL);
-        group_label[4] = getLangSTR(APP_LABEL);
-        group_label[5] = getLangSTR(UNKNOWN_LABEL);
-        group_label[6] = getLangSTR(OTHER_LABEL);
-        
-    //log_info("group_label[%d] = %s | unsafe_source %i", i, group_label[i].c_str(), unsafe_source);
+  if (unsafe_source)
+  {
+    group_label[0] = getLangSTR(GAME_LABEL);
+    group_label[1] = getLangSTR(PATCH_LABEL);
+    group_label[2] = getLangSTR(DLC_LABEL);
+    group_label[3] = getLangSTR(THEME_LABEL);
+    group_label[4] = getLangSTR(APP_LABEL);
+    group_label[5] = getLangSTR(UNKNOWN_LABEL);
+    group_label[6] = getLangSTR(OTHER_LABEL);
   }
 
 
