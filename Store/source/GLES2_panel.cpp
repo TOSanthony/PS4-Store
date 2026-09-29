@@ -542,12 +542,15 @@ void GLES2_Draw_sysinfo(void)
 
     //ORBIS_RenderArrowAtCoords(USE_COLOR, 500, 700);
     /* FMEM: draw filling color bar, by percentage */
+    #if 0
     vec4 r = (vec4) { -.975, -.950,   -.505, -.955 };
     rr.push_back(r);
     //ORBIS_RenderFillRects(USE_COLOR, &grey, &r, 1);
     ORBIS_RenderDrawBox(USE_COLOR, grey, r);
     GLES2_DrawFillingRect(rr, white, dfp_fmem);
     rr.clear();
+    #endif
+    
    /* if(menu_pos.z == ON_MAIN_SCREEN || menu_pos.z == ON_LEFT_PANEL){
     r = (vec4) { -.985, -.100,   -.505, -.105 };
     rr.push_back(r);
