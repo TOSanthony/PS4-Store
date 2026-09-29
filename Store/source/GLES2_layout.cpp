@@ -270,9 +270,8 @@ static void layout_compose_text(std::shared_ptr<layout_t> &l, int idx, vec2 &pen
                     //}
                     
                     data = groups[idx+1 ].token_d[0].off;
-                    //log_info("groups[ %i ].token_d[ 0 ].off, %s", idx+1 , data.c_str());
-                    tmp = data;
-                    //add_text(l->vbo, sub_font, tmp.c_str(), &col, &pen);
+                    //tmp = data;
+                    tmp = fmt::format("▶ {}", data);
                     l->vbo.add_text(sub_font, tmp, col, pen);
 
                     if (save_text)
