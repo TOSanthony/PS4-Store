@@ -235,7 +235,14 @@ void fill_menu_text() {
 
   for (int i = 0; i < 7; i++) {
     if (unsafe_source)
-        group_label[i] = group_labels_non_pkg_zone[i];
+        //group_label[i] = group_labels_non_pkg_zone[i];
+        group_label[0] = getLangSTR(GAME_LABEL);
+        group_label[1] = getLangSTR(PATCH_LABEL);
+        group_label[2] = getLangSTR(DLC_LABEL);
+        group_label[3] = getLangSTR(THEME_LABEL);
+        group_label[4] = getLangSTR(APP_LABEL);
+        group_label[5] = getLangSTR(UNKNOWN_LABEL);
+        group_label[6] = getLangSTR(OTHER_LABEL);
         
     //log_info("group_label[%d] = %s | unsafe_source %i", i, group_label[i].c_str(), unsafe_source);
   }
