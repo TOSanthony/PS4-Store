@@ -713,15 +713,17 @@ void GLES2_render_layout_v2(std::shared_ptr<layout_t>  &l, int unused)
             icon_rect.zw = px_pos_to_normalized(&icon_p2);
             icon_rect.yw = icon_rect.wy;
             
-            on_GLES2_Render_icon(
-                USE_COLOR,
-                category_icons[0],
-                2,
-                icon_rect
-            );
-
-
+            int icon_idx = l->curr_item;
             
+            if (icon_idx >= 0 && icon_idx < 10)
+            {
+                on_GLES2_Render_icon(
+                    USE_COLOR,
+                    category_icons[icon_idx],
+                    2,
+                    icon_rect
+                );
+            }
         }
         if(l == icon_panel)
         {   // draw squared icons 
