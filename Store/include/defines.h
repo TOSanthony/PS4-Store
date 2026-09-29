@@ -305,7 +305,7 @@ int32_t netInit(void);
 unsigned char *orbisFileGetFileContent( const char *filename );
 extern size_t _orbisFile_lastopenFile_size;
 
-extern GLuint category_icons[8];
+extern GLuint category_icons[9];
 
 void queue_panel_init(void);
 int  thread_find_by_item   (int req_idx);
