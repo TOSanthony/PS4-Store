@@ -175,6 +175,7 @@ static void layout_compose_text(std::shared_ptr<layout_t> &l, int idx, vec2 &pen
             {  
                 left_panel2->mtx.lock();      
                 tmp = fmt::format(format, data);
+                pen.x += 40;
                 
                 if (l->page_sel.x != 3)
                     is_sort_panel = false;
