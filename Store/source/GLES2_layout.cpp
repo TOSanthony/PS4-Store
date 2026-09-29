@@ -701,7 +701,7 @@ void GLES2_render_layout_v2(std::shared_ptr<layout_t>  &l, int unused)
         if (l == left_panel2)
         {
             rr.push_back(selection_box);
-            ORBIS_RenderFillRects(USE_COLOR, grey, rr, 1);
+            //ORBIS_RenderFillRects(USE_COLOR, grey, rr, 1);
             rr.clear();
         
             for (int i = 0; i < 10; i++)
