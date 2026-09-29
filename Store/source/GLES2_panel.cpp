@@ -24,6 +24,7 @@ extern std::vector<std::string> group_label;
 extern vec2 resolution;
 extern bool unsafe_source;
 
+//const char* group_labels_non_pkg_zone[7];
 
 //const char* group_labels_non_pkg_zone[] =
 //{   // 0 is reserved index for: (label, total count)
@@ -36,18 +37,27 @@ extern bool unsafe_source;
     //"Other"
 //};
 
-const char* group_labels_non_pkg_zone[7];
+std::string group_labels_non_pkg_zone[7];
 
-void init_group_labels() {
-    group_labels_non_pkg_zone[0] = !getLangSTR(GROUP_GAMES).empty() ? getLangSTR(GROUP_GAMES).c_str() : "Game";
-    group_labels_non_pkg_zone[1] = !getLangSTR(GROUP_UPDATES).empty() ? getLangSTR(GROUP_UPDATES).c_str() : "Patch";
-    group_labels_non_pkg_zone[2] = !getLangSTR(GROUP_DLC).empty() ? getLangSTR(GROUP_DLC).c_str() : "DLC";
-    group_labels_non_pkg_zone[3] = !getLangSTR(GROUP_THEME).empty() ? getLangSTR(GROUP_THEME).c_str() : "Theme"; // Utilisation de MEDIA ou autre clé dispo
-    group_labels_non_pkg_zone[4] = !getLangSTR(GROUP_APP).empty() ? getLangSTR(GROUP_APP).c_str() : "App";
-    group_labels_non_pkg_zone[5] = !getLangSTR(GROUP_UNKNOWN).empty() ? getLangSTR(GROUP_UNKNOWN).c_str() : "Unknown";
-    group_labels_non_pkg_zone[6] = !getLangSTR(GROUP_OTHER).empty() ? getLangSTR(GROUP_OTHER).c_str() : "Other";
+// Fonction de sécurité pour éviter le crash si la clé est absente du lang.ini
+inline std::string safeGetLang(Lang_STR str, const char* fallback) {
+    try {
+        std::string val = getLangSTR(str);
+        return !val.empty() ? val : fallback;
+    } catch (...) {
+        return fallback;
+    }
 }
 
+void init_group_labels() {
+    group_labels_non_pkg_zone[0] = safeGetLang(GROUP_GAMES, "Game");
+    group_labels_non_pkg_zone[1] = safeGetLang(GROUP_UPDATES, "Patch");
+    group_labels_non_pkg_zone[2] = safeGetLang(GROUP_DLC, "DLC");
+    group_labels_non_pkg_zone[3] = safeGetLang(GROUP_THEME, "Theme");
+    group_labels_non_pkg_zone[4] = safeGetLang(GROUP_APP, "App");
+    group_labels_non_pkg_zone[5] = safeGetLang(GROUP_UNKNOWN, "Unknown");
+    group_labels_non_pkg_zone[6] = safeGetLang(GROUP_OTHER, "Other");
+}
 
 extern std::atomic_bool is_icons_finished, icons_thread_started;
 
