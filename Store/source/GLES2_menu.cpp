@@ -58,7 +58,8 @@ void GLES2_render_paged_list(int unused)
     {   
         int count = 64;
         l = GLES2_layout_init( count );
-        l->bound_box =  (vec4){ 0, 800,   500, 700 };
+        //l->bound_box =  (vec4){ 0, 900,   500, 700 };
+        l->bound_box =  (vec4){ 0, 1000,   500, 700 };
         l->fieldsize = (ivec2){ 1, 10 };
         l->item_c    = l->fieldsize.x * l->fieldsize.y;
         
