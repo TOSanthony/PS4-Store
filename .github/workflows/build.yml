@@ -33,6 +33,7 @@ jobs:
     - name: Build Store
       run: |
         cd Store
+        make clean
         make -j$(nproc)
         # PkgTool.Core names the output after content_id; rename for consistency
         pkg=$(ls *.pkg 2>/dev/null | head -1)
