@@ -24,19 +24,7 @@ extern std::vector<std::string> group_label;
 extern vec2 resolution;
 extern bool unsafe_source;
 
-//const char* group_labels_non_pkg_zone[7];
-
-//const char* group_labels_non_pkg_zone[] =
-//{   // 0 is reserved index for: (label, total count)
-    //"Game",
-    //"Patch",
-    //"DLC",
-    //"Theme",
-    //"App",
-    //"Unknown",
-    //"Other"
-//};
-
+// 1. Votre tableau d'origine inchangé
 const char* group_labels_non_pkg_zone[] =
 {   // 0 is reserved index for: (label, total count)
     "Game",
@@ -47,6 +35,39 @@ const char* group_labels_non_pkg_zone[] =
     "Unknown",
     "Other"
 };
+
+// 2. Fonction d'initialisation sécurisée avec des chaînes persistantes (static)
+void init_group_labels() {
+    // Si la langue n'est pas initialisée, on ne touche à rien
+    if (!lang_is_initialized) return;
+
+    try {
+        std::string v;
+
+        v = getLangSTR(GROUP_GAMES);
+        if (!v.empty()) { static std::string s0 = v; group_labels_non_pkg_zone[0] = s0.c_str(); }
+
+        v = getLangSTR(GROUP_UPDATES);
+        if (!v.empty()) { static std::string s1 = v; group_labels_non_pkg_zone[1] = s1.c_str(); }
+
+        v = getLangSTR(GROUP_DLC);
+        if (!v.empty()) { static std::string s2 = v; group_labels_non_pkg_zone[2] = s2.c_str(); }
+
+        v = getLangSTR(GROUP_THEME);
+        if (!v.empty()) { static std::string s3 = v; group_labels_non_pkg_zone[3] = s3.c_str(); }
+
+        v = getLangSTR(GROUP_APP);
+        if (!v.empty()) { static std::string s4 = v; group_labels_non_pkg_zone[4] = s4.c_str(); }
+
+        v = getLangSTR(GROUP_UNKNOWN);
+        if (!v.empty()) { static std::string s5 = v; group_labels_non_pkg_zone[5] = s5.c_str(); }
+
+        v = getLangSTR(GROUP_OTHER);
+        if (!v.empty()) { static std::string s6 = v; group_labels_non_pkg_zone[6] = s6.c_str(); }
+    } catch (...) {
+        // En cas de pépin, le tableau garde ses valeurs en dur d'origine par sécurité
+    }
+}
 
 extern std::atomic_bool is_icons_finished, icons_thread_started;
 
