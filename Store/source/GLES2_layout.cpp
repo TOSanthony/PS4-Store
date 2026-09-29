@@ -697,7 +697,7 @@ void GLES2_render_layout_v2(std::shared_ptr<layout_t>  &l, int unused)
     if(!l->f_rect.empty())
     {   // read from cached normalized rectangle for more work
         selection_box = l->f_rect[ l->f_sele ];
-
+        
         if (l == left_panel2)
         {
             rr.push_back(selection_box);
@@ -709,13 +709,16 @@ void GLES2_render_layout_v2(std::shared_ptr<layout_t>  &l, int unused)
                 if (i >= 10)
                     break;
         
-                vec4 icon_rect = l->f_rect[i];
+                float y = 850.0f - (i * 70.0f);
         
-                /* position horizontale */
-                icon_rect.z = icon_rect.x + 0.025f;
+                vec2 icon_p1 = {20.0f, y};
+                vec2 icon_p2 = {52.0f, y + 32.0f};
         
-                /* centrage vertical */
-                icon_rect.w = icon_rect.y - 0.055f;
+                vec4 icon_rect;
+        
+                icon_rect.xy = px_pos_to_normalized(&icon_p1);
+                icon_rect.zw = px_pos_to_normalized(&icon_p2);
+                icon_rect.yw = icon_rect.wy;
         
                 on_GLES2_Render_icon(
                     USE_COLOR,
