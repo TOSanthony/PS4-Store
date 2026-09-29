@@ -172,8 +172,8 @@ void fill_menu_text() {
   //lang_key[STR_NOT_FOUND]
   if (stropts[lang_key[APP_UPDATE_AVAIL]].empty()) {
     //stropts[lang_key[SETTINGS_6]] = "Automatically install";
-    stropts[lang_key[AUTO_FAILURE_ERROR]] = "Show Install Progress is Required to be Disabled to Enable this Setting";
-    stropts[lang_key[INSTALL_PROG_ERROR]] = "Auto Install is Required to be Disabled to Enable this Setting";
+    //stropts[lang_key[AUTO_FAILURE_ERROR]] = "Show Install Progress is Required to be Disabled to Enable this Setting";
+    //stropts[lang_key[INSTALL_PROG_ERROR]] = "Auto Install is Required to be Disabled to Enable this Setting";
 
     //stropts[lang_key[CANCEL]] = "Cancel";
     //stropts[lang_key[DL_AND_IN]] = "Download and Install";
@@ -187,7 +187,7 @@ void fill_menu_text() {
     stropts[lang_key[REINSTALL_APP]] = "Reinstall Latest";
   }
   // keep compitability with older store pkgs and unupdated langs
-  if (stropts[lang_key[PRE_LOADING_CACHE]].empty()) {
+  if (stropts[lang_key[SHOW_PROG]].empty()) {
     //stropts[lang_key[SETTINGS_5]] = "Pre-load Cached Icons On Startup";
     //stropts[lang_key[PRE_LOAD_SETTING]] = "Pre-load Cached Icons On Startup";
     stropts[lang_key[CHECKING_FOR_UPDATES]] = "Checking for updates...";
