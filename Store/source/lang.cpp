@@ -314,5 +314,6 @@ bool LoadLangs(int LangCode)
     }
 
     fill_menu_text();
+    init_group_labels();
     return true;
 }
