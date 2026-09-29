@@ -341,7 +341,7 @@ void GLES2_render_download_panel(void)
                     }
                     tmp = li.token_d[ req ].off;
                     //add_text(l->vbo, main_font, tmp.c_str(), &col, &pen);
-                    l->vbo.add_text(main_font, tmp, col, pen);
+                    //l->vbo.add_text(main_font, tmp, col, pen);
 
                     pen.x  = 500,
                     pen.y -=  32;
