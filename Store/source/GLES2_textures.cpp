@@ -99,7 +99,7 @@ void on_GLES2_Init_icons(int view_w, int view_h)
     curr_Program = glsl_Program[USE_COLOR];
     // reshape
     
-    category_icons[0] = load_png_asset_into_texture("assets/game.png");
+    category_icons[0] = load_png_asset_into_texture("/mnt/sandbox/pfsmnt/NPXS39041-app0/assets/game.png");
     log_info("game icon = %u", category_icons[0]);
     category_icons[1] = load_png_asset_into_texture("assets/patch.png");
     log_info("game icon = %u", category_icons[1]);
