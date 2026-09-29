@@ -24,7 +24,7 @@
 */
 
 GLuint glsl_Program[MAX_SL_PROGRAMS];
-GLuint category_icons[10] = {0};
+GLuint category_icons[9] = {0};
 static GLuint curr_Program;  // the current one
 
 #define BUFFER_OFFSET(i) ((void*)(i))
