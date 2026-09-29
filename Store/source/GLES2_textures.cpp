@@ -113,8 +113,15 @@ void on_GLES2_Init_icons(int view_w, int view_h)
     log_info("game icon = %u", category_icons[5]);
     category_icons[6] = load_png_asset_into_texture("/mnt/sandbox/pfsmnt/NPXS39041-app0/assets/other.png");
     log_info("game icon = %u", category_icons[6]);
-    category_icons[9] = load_png_asset_into_texture("/mnt/sandbox/pfsmnt/NPXS39041-app0/assets/settings.png");
+
+    category_icons[7] = load_png_asset_into_texture("/mnt/sandbox/pfsmnt/NPXS39041-app0/assets/settings.png");
     log_info("game icon = %u", category_icons[7]);
+
+    category_icons[8] = load_png_asset_into_texture("/mnt/sandbox/pfsmnt/NPXS39041-app0/assets/settings.png");
+    log_info("game icon = %u", category_icons[8]);
+    
+    category_icons[9] = load_png_asset_into_texture("/mnt/sandbox/pfsmnt/NPXS39041-app0/assets/settings.png");
+    log_info("game icon = %u", category_icons[9]);
     
     glViewport(0, 0, view_w, view_h);
 }
