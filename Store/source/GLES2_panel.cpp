@@ -37,56 +37,16 @@ extern bool unsafe_source;
     //"Other"
 //};
 
-std::string group_labels_non_pkg_zone[7];
-
-// Variable externe indiquant si les langues sont réellement chargées et prêtes
-extern bool lang_is_initialized; 
-
-void init_group_labels() {
-    // Si la langue n'est pas initialisée, on met directement les valeurs par défaut sans appeler getLangSTR
-    if (!lang_is_initialized) {
-        group_labels_non_pkg_zone[0] = "Game";
-        group_labels_non_pkg_zone[1] = "Patch";
-        group_labels_non_pkg_zone[2] = "DLC";
-        group_labels_non_pkg_zone[3] = "Theme";
-        group_labels_non_pkg_zone[4] = "App";
-        group_labels_non_pkg_zone[5] = "Unknown";
-        group_labels_non_pkg_zone[6] = "Other";
-        return;
-    }
-
-    // Sinon, on essaie de récupérer de manière sécurisée
-    try {
-        std::string v0 = getLangSTR(GROUP_GAMES);
-        group_labels_non_pkg_zone[0] = !v0.empty() ? v0 : "Game";
-
-        std::string v1 = getLangSTR(GROUP_UPDATES);
-        group_labels_non_pkg_zone[1] = !v1.empty() ? v1 : "Patch";
-
-        std::string v2 = getLangSTR(GROUP_DLC);
-        group_labels_non_pkg_zone[2] = !v2.empty() ? v2 : "DLC";
-
-        std::string v3 = getLangSTR(GROUP_THEME);
-        group_labels_non_pkg_zone[3] = !v3.empty() ? v3 : "Theme";
-
-        std::string v4 = getLangSTR(GROUP_APP);
-        group_labels_non_pkg_zone[4] = !v4.empty() ? v4 : "App";
-
-        std::string v5 = getLangSTR(GROUP_UNKNOWN);
-        group_labels_non_pkg_zone[5] = !v5.empty() ? v5 : "Unknown";
-
-        std::string v6 = getLangSTR(GROUP_OTHER);
-        group_labels_non_pkg_zone[6] = !v6.empty() ? v6 : "Other";
-    } catch (...) {
-        group_labels_non_pkg_zone[0] = "Game";
-        group_labels_non_pkg_zone[1] = "Patch";
-        group_labels_non_pkg_zone[2] = "DLC";
-        group_labels_non_pkg_zone[3] = "Theme";
-        group_labels_non_pkg_zone[4] = "App";
-        group_labels_non_pkg_zone[5] = "Unknown";
-        group_labels_non_pkg_zone[6] = "Other";
-    }
-}
+const char* group_labels_non_pkg_zone[] =
+{   // 0 is reserved index for: (label, total count)
+    "Game",
+    "Patch",
+    "DLC",
+    "Theme",
+    "App",
+    "Unknown",
+    "Other"
+};
 
 extern std::atomic_bool is_icons_finished, icons_thread_started;
 
