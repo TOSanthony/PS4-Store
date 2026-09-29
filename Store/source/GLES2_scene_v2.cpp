@@ -374,7 +374,7 @@ void GLES2_scene_init(int w, int h)
 #if 1
   //  if (!left_panel) left_panel = calloc(1, sizeof(layout_t));
 
-    left_panel->bound_box = (vec4){ 0, 950,   500, 700 };
+    left_panel->bound_box = (vec4){ 0, 850,   500, 700 };
     left_panel->fieldsize = (ivec2){ 1, 9 };
     // by calloc curr page is 0!
     /* malloc for max pages, plus additional list  */
