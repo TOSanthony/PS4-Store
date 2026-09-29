@@ -43,9 +43,8 @@ extern bool lang_is_initialized;
 void init_group_labels() {
     log_info("init_group_labels: execution started");
 
-    // Si la langue n'est pas initialisée, on ne touche à rien
     if (!lang_is_initialized) {
-        log_info("init_group_labels: lang_is_initialized is false, skipping translation.");
+        log_info("init_group_labels: lang_is_initialized is false, skipping.");
         return;
     }
 
@@ -53,57 +52,36 @@ void init_group_labels() {
         std::string v;
 
         v = getLangSTR(GROUP_GAMES);
-        if (!v.empty()) { 
-            static std::string s0 = v; 
-            group_labels_non_pkg_zone[0] = s0.c_str(); 
-            log_info("init_group_labels: GROUP_GAMES translated to '%s'", s0.c_str());
-        }
+        log_info("DEBUG LANG - GROUP_GAMES raw: '%s'", v.c_str());
+        if (!v.empty()) { static std::string s0 = v; group_labels_non_pkg_zone[0] = s0.c_str(); }
 
         v = getLangSTR(GROUP_UPDATES);
-        if (!v.empty()) { 
-            static std::string s1 = v; 
-            group_labels_non_pkg_zone[1] = s1.c_str(); 
-            log_info("init_group_labels: GROUP_UPDATES translated to '%s'", s1.c_str());
-        }
+        log_info("DEBUG LANG - GROUP_UPDATES raw: '%s'", v.c_str());
+        if (!v.empty()) { static std::string s1 = v; group_labels_non_pkg_zone[1] = s1.c_str(); }
 
         v = getLangSTR(GROUP_DLC);
-        if (!v.empty()) { 
-            static std::string s2 = v; 
-            group_labels_non_pkg_zone[2] = s2.c_str(); 
-            log_info("init_group_labels: GROUP_DLC translated to '%s'", s2.c_str());
-        }
+        log_info("DEBUG LANG - GROUP_DLC raw: '%s'", v.c_str());
+        if (!v.empty()) { static std::string s2 = v; group_labels_non_pkg_zone[2] = s2.c_str(); }
 
         v = getLangSTR(GROUP_THEME);
-        if (!v.empty()) { 
-            static std::string s3 = v; 
-            group_labels_non_pkg_zone[3] = s3.c_str(); 
-            log_info("init_group_labels: GROUP_THEME translated to '%s'", s3.c_str());
-        }
+        log_info("DEBUG LANG - GROUP_THEME raw: '%s'", v.c_str());
+        if (!v.empty()) { static std::string s3 = v; group_labels_non_pkg_zone[3] = s3.c_str(); }
 
         v = getLangSTR(GROUP_APP);
-        if (!v.empty()) { 
-            static std::string s4 = v; 
-            group_labels_non_pkg_zone[4] = s4.c_str(); 
-            log_info("init_group_labels: GROUP_APP translated to '%s'", s4.c_str());
-        }
+        log_info("DEBUG LANG - GROUP_APP raw: '%s'", v.c_str());
+        if (!v.empty()) { static std::string s4 = v; group_labels_non_pkg_zone[4] = s4.c_str(); }
 
         v = getLangSTR(GROUP_UNKNOWN);
-        if (!v.empty()) { 
-            static std::string s5 = v; 
-            group_labels_non_pkg_zone[5] = s5.c_str(); 
-            log_info("init_group_labels: GROUP_UNKNOWN translated to '%s'", s5.c_str());
-        }
+        log_info("DEBUG LANG - GROUP_UNKNOWN raw: '%s'", v.c_str());
+        if (!v.empty()) { static std::string s5 = v; group_labels_non_pkg_zone[5] = s5.c_str(); }
 
         v = getLangSTR(GROUP_OTHER);
-        if (!v.empty()) { 
-            static std::string s6 = v; 
-            group_labels_non_pkg_zone[6] = s6.c_str(); 
-            log_info("init_group_labels: GROUP_OTHER translated to '%s'", s6.c_str());
-        }
+        log_info("DEBUG LANG - GROUP_OTHER raw: '%s'", v.c_str());
+        if (!v.empty()) { static std::string s6 = v; group_labels_non_pkg_zone[6] = s6.c_str(); }
 
         log_info("init_group_labels: finished successfully.");
     } catch (...) {
-        log_info("init_group_labels: caught exception, fallback to default labels.");
+        log_info("init_group_labels: caught exception.");
     }
 }
 
