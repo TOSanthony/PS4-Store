@@ -665,6 +665,24 @@ void GLES2_render_layout_v2(std::shared_ptr<layout_t>  &l, int unused)
             r.yw  = r.wy;            // flip on Y axis
 //            log_info("  %p l->f_rect[%i] = %p", l.get(), i, l->f_rect);
             l->f_rect[i] = r;        // save the normalized rectangle
+
+
+            if (l == left_panel2 && loop_idx < 10)
+            {
+                vec4 icon_rect = r;
+            
+                icon_rect.z = icon_rect.x + 0.03f;
+            
+                on_GLES2_Render_icon(
+                    USE_COLOR,
+                    category_icons[loop_idx],
+                    2,
+                    icon_rect
+                );
+            }
+
+
+            
             // to refresh main header/title screen
             bool save_text = false;
             // if item is the selected one save frect for optional work
@@ -704,26 +722,6 @@ void GLES2_render_layout_v2(std::shared_ptr<layout_t>  &l, int unused)
             ORBIS_RenderFillRects(USE_COLOR, grey, rr, 1);
             rr.clear();
 
-            vec2 icon_p1 = {20, 850};
-            vec2 icon_p2 = {52, 882};
-            
-            vec4 icon_rect;
-            
-            icon_rect.xy = px_pos_to_normalized(&icon_p1);
-            icon_rect.zw = px_pos_to_normalized(&icon_p2);
-            icon_rect.yw = icon_rect.wy;
-            
-            int icon_idx = l->curr_item;
-            
-            if (icon_idx >= 0 && icon_idx < 10)
-            {
-                on_GLES2_Render_icon(
-                    USE_COLOR,
-                    category_icons[icon_idx],
-                    2,
-                    icon_rect
-                );
-            }
         }
         if(l == icon_panel)
         {   // draw squared icons 
