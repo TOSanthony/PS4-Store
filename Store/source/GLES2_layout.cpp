@@ -733,7 +733,8 @@ void GLES2_render_layout_v2(std::shared_ptr<layout_t>  &l, int unused)
         
             if (sel >= 0 && sel < 10 && category_icons[sel] != 0)
             {
-                float y = 850.0f - (sel * 70.0f);
+                //float y = 850.0f - (sel * 70.0f);
+                float y = 950.0f - (sel * 70.0f);
         
                 vec2 icon_p1 = {20.0f, y};
                 vec2 icon_p2 = {52.0f, y + 32.0f};
@@ -901,7 +902,8 @@ void GLES2_render_layout_v2(std::shared_ptr<layout_t>  &l, int unused)
     
         if (sel >= 0 && sel < 10 && category_icons[sel] != 0)
         {
-            float y = 850.0f - (sel * 70.0f);
+            //float y = 850.0f - (sel * 70.0f);
+            float y = 950.0f - (sel * 70.0f);
     
             vec2 icon_p1 = {20.0f, y};
             vec2 icon_p2 = {52.0f, y + 32.0f};
