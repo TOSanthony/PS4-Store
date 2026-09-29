@@ -894,7 +894,33 @@ void GLES2_render_layout_v2(std::shared_ptr<layout_t>  &l, int unused)
          //ftgl_render_vbo(l->vbo, NULL);
        l->vbo.render_vbo(NULL);
     }
+    
+    if (l == left_panel2)
+    {
+        int sel = l->curr_item;
+    
+        if (sel >= 0 && sel < 10 && category_icons[sel] != 0)
+        {
+            float y = 850.0f - (sel * 70.0f);
+    
+            vec2 icon_p1 = {20.0f, y};
+            vec2 icon_p2 = {52.0f, y + 32.0f};
+    
+            vec4 icon_rect;
+    
+            icon_rect.xy = px_pos_to_normalized(&icon_p1);
+            icon_rect.zw = px_pos_to_normalized(&icon_p2);
+    
+            on_GLES2_Render_icon(
+                USE_COLOR,
+                category_icons[sel],
+                2,
+                icon_rect
+            );
+        }
+    }
 
+    
 //  log_info("%s %p", __FUNCTION__, l);
 }
 
