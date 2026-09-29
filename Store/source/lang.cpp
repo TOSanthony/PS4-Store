@@ -254,7 +254,11 @@ void fill_menu_text() {
     group_label[5] = getLangSTR(UNKNOWN_LABEL);
     group_label[6] = getLangSTR(OTHER_LABEL);
   }
-
+    
+  for(int i = 0; i < 7; i++)
+  {
+    log_info("group_label[%d] = %s", i, group_label[i].c_str());
+  }
 
 }
 // OVERWRITE_SAVE
