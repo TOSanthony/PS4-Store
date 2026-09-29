@@ -24,9 +24,8 @@ extern std::vector<std::string> group_label;
 extern vec2 resolution;
 extern bool unsafe_source;
 
-// 1. Votre tableau d'origine inchangé
-const char* group_labels_non_pkg_zone[] =
-{   // 0 is reserved index for: (label, total count)
+// 1. Tableau d'origine (valeurs de secours)
+const char* group_labels_non_pkg_zone[7] = {
     "Game",
     "Patch",
     "DLC",
@@ -39,7 +38,7 @@ const char* group_labels_non_pkg_zone[] =
 // Déclaration de la variable externe définie dans lang.cpp
 extern bool lang_is_initialized;
 
-// 2. Fonction d'initialisation sécurisée avec des chaînes persistantes (static) et des logs
+// 2. Fonction d'initialisation avec les logs et les traductions
 void init_group_labels() {
     log_info("init_group_labels: execution started");
 
