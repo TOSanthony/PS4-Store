@@ -706,7 +706,7 @@ void GLES2_render_layout_v2(std::shared_ptr<layout_t>  &l, int unused)
         
             for (int i = 0; i < 10; i++)
             {
-                float y = 1000.0f - (i * 70.0f);
+                float y = 950.0f - (i * 70.0f);
         
                 vec2 icon_p1 = {20.0f, y};
                 vec2 icon_p2 = {52.0f, y + 32.0f};
