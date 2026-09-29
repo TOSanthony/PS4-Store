@@ -174,19 +174,8 @@ static void layout_compose_text(std::shared_ptr<layout_t> &l, int idx, vec2 &pen
             if(l == left_panel2)
             {  
                 left_panel2->mtx.lock();      
-                //tmp = fmt::format(format, data);
-                switch(idx)
-                {
-                  case 0: tmp = fmt::format("🎮 {}", data); break;
-                  case 1: tmp = fmt::format("⬆ {}", data); break;
-                  case 2: tmp = fmt::format("🧩 {}", data); break;
-                  case 3: tmp = fmt::format("🎨 {}", data); break;
-                  case 4: tmp = fmt::format("📦 {}", data); break;
-                  case 5: tmp = fmt::format("❓ {}", data); break;
-                  case 6: tmp = fmt::format("📁 {}", data); break;
-                  default: tmp = data; break;
-                }
-
+                tmp = fmt::format(format, data);
+                
                 if (l->page_sel.x != 3)
                     is_sort_panel = false;
 
