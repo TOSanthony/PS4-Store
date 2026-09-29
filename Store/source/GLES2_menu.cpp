@@ -73,8 +73,21 @@ void GLES2_render_paged_list(int unused)
             // Utilisation du libellé de groupe avec sa quantité entre parenthèses
             //std::string label = (group_label.size() > i && !group_label[i].empty()) ? group_label[i] : "Group";
             //combined_menu.push_back(fmt::format("{} ({})", label, group_count));
-            std::string label = (group_label.size() > i && !group_label[i].empty()) ? group_label[i] : "Group";
+            
+            //std::string label = (group_label.size() > i && !group_label[i].empty()) ? group_label[i] : "Group";
+            //combined_menu.push_back(label);
+
+            std::string label =
+            std::string(ICON_FA_GAMEPAD) +
+            " " +
+            ((group_label.size() > i && !group_label[i].empty())
+            ? group_label[i]
+            : "Group");
+             
             combined_menu.push_back(label);
+
+
+            
         }
 
         // 2. Options supplémentaires dynamiques selon auto_install
