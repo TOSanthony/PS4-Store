@@ -36,53 +36,53 @@ const char* group_labels_non_pkg_zone[7] = {
 };
 
 // Déclaration de la variable externe définie dans lang.cpp
-extern bool lang_is_initialized;
+//extern bool lang_is_initialized;
 
 // 2. Fonction d'initialisation avec les logs et les traductions
-void init_group_labels() {
-    log_info("init_group_labels: execution started");
+//void init_group_labels() {
+    //log_info("init_group_labels: execution started");
 
-    if (!lang_is_initialized) {
-        log_info("init_group_labels: lang_is_initialized is false, skipping.");
-        return;
-    }
+    //if (!lang_is_initialized) {
+        //log_info("init_group_labels: lang_is_initialized is false, skipping.");
+        //return;
+    //}
 
-    try {
-        std::string v;
+    //try {
+        //std::string v;
 
-        v = getLangSTR(GAME_LABEL);
-        log_info("DEBUG LANG - GAME_LABEL raw: '%s'", v.c_str());
-        if (!v.empty()) { static std::string s0 = v; group_labels_non_pkg_zone[0] = s0.c_str(); }
+        //v = getLangSTR(GAME_LABEL);
+        //log_info("DEBUG LANG - GAME_LABEL raw: '%s'", v.c_str());
+        //if (!v.empty()) { static std::string s0 = v; group_labels_non_pkg_zone[0] = s0.c_str(); }
 
-        v = getLangSTR(PATCH_LABEL);
-        log_info("DEBUG LANG - PATCH_LABEL raw: '%s'", v.c_str());
-        if (!v.empty()) { static std::string s1 = v; group_labels_non_pkg_zone[1] = s1.c_str(); }
+        //v = getLangSTR(PATCH_LABEL);
+        //log_info("DEBUG LANG - PATCH_LABEL raw: '%s'", v.c_str());
+        //if (!v.empty()) { static std::string s1 = v; group_labels_non_pkg_zone[1] = s1.c_str(); }
 
-        v = getLangSTR(DLC_LABEL);
-        log_info("DEBUG LANG - DLC_LABEL raw: '%s'", v.c_str());
-        if (!v.empty()) { static std::string s2 = v; group_labels_non_pkg_zone[2] = s2.c_str(); }
+        //v = getLangSTR(DLC_LABEL);
+        //log_info("DEBUG LANG - DLC_LABEL raw: '%s'", v.c_str());
+        //if (!v.empty()) { static std::string s2 = v; group_labels_non_pkg_zone[2] = s2.c_str(); }
 
-        v = getLangSTR(THEME_LABEL);
-        log_info("DEBUG LANG - THEME_LABEL raw: '%s'", v.c_str());
-        if (!v.empty()) { static std::string s3 = v; group_labels_non_pkg_zone[3] = s3.c_str(); }
+        //v = getLangSTR(THEME_LABEL);
+        //log_info("DEBUG LANG - THEME_LABEL raw: '%s'", v.c_str());
+        //if (!v.empty()) { static std::string s3 = v; group_labels_non_pkg_zone[3] = s3.c_str(); }
 
-        v = getLangSTR(APP_LABEL);
-        log_info("DEBUG LANG - APP_LABEL raw: '%s'", v.c_str());
-        if (!v.empty()) { static std::string s4 = v; group_labels_non_pkg_zone[4] = s4.c_str(); }
+        //v = getLangSTR(APP_LABEL);
+        //log_info("DEBUG LANG - APP_LABEL raw: '%s'", v.c_str());
+        //if (!v.empty()) { static std::string s4 = v; group_labels_non_pkg_zone[4] = s4.c_str(); }
 
-        v = getLangSTR(UNKNOWN_LABEL);
-        log_info("DEBUG LANG - UNKNOWN_LABEL raw: '%s'", v.c_str());
-        if (!v.empty()) { static std::string s5 = v; group_labels_non_pkg_zone[5] = s5.c_str(); }
+        //v = getLangSTR(UNKNOWN_LABEL);
+        //log_info("DEBUG LANG - UNKNOWN_LABEL raw: '%s'", v.c_str());
+        //if (!v.empty()) { static std::string s5 = v; group_labels_non_pkg_zone[5] = s5.c_str(); }
 
-        v = getLangSTR(OTHER_LABEL);
-        log_info("DEBUG LANG - OTHER_LABEL raw: '%s'", v.c_str());
-        if (!v.empty()) { static std::string s6 = v; group_labels_non_pkg_zone[6] = s6.c_str(); }
+        //v = getLangSTR(OTHER_LABEL);
+        //log_info("DEBUG LANG - OTHER_LABEL raw: '%s'", v.c_str());
+        //if (!v.empty()) { static std::string s6 = v; group_labels_non_pkg_zone[6] = s6.c_str(); }
 
-        log_info("init_group_labels: finished successfully.");
-    } catch (...) {
-        log_info("init_group_labels: caught exception.");
-    }
-}
+        //log_info("init_group_labels: finished successfully.");
+    //} catch (...) {
+        //log_info("init_group_labels: caught exception.");
+    //}
+//}
 
 extern std::atomic_bool is_icons_finished, icons_thread_started;
 
