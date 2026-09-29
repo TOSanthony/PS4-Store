@@ -174,7 +174,8 @@ static void layout_compose_text(std::shared_ptr<layout_t> &l, int idx, vec2 &pen
             if(l == left_panel2)
             {  
                 left_panel2->mtx.lock();      
-                tmp = fmt::format(format, data);
+                //tmp = fmt::format(format, data);
+                tmp = fmt::format("[>] {}", data);
 
                 if (l->page_sel.x != 3)
                     is_sort_panel = false;
@@ -270,8 +271,7 @@ static void layout_compose_text(std::shared_ptr<layout_t> &l, int idx, vec2 &pen
                     //}
                     
                     data = groups[idx+1 ].token_d[0].off;
-                    //tmp = data;
-                    tmp = fmt::format("[>] {}", data);
+                    tmp = data;
                     l->vbo.add_text(sub_font, tmp, col, pen);
 
                     if (save_text)
@@ -343,8 +343,7 @@ static void layout_compose_text(std::shared_ptr<layout_t> &l, int idx, vec2 &pen
             }
             else // default/fallback one
             {
-                //tmp = data;
-                tmp = fmt::format("[>] {}", data);
+                tmp = data;
                 if (save_text)
                     selected_text = tmp;
             }
