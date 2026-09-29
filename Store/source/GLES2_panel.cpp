@@ -50,32 +50,32 @@ void init_group_labels() {
     try {
         std::string v;
 
-        v = getLangSTR(GROUP_GAMES);
-        log_info("DEBUG LANG - GROUP_GAMES raw: '%s'", v.c_str());
+        v = getLangSTR(GAME_LABEL);
+        log_info("DEBUG LANG - GAME_LABEL raw: '%s'", v.c_str());
         if (!v.empty()) { static std::string s0 = v; group_labels_non_pkg_zone[0] = s0.c_str(); }
 
-        v = getLangSTR(GROUP_UPDATES);
-        log_info("DEBUG LANG - GROUP_UPDATES raw: '%s'", v.c_str());
+        v = getLangSTR(PATCH_LABEL);
+        log_info("DEBUG LANG - PATCH_LABEL raw: '%s'", v.c_str());
         if (!v.empty()) { static std::string s1 = v; group_labels_non_pkg_zone[1] = s1.c_str(); }
 
-        v = getLangSTR(GROUP_DLC);
-        log_info("DEBUG LANG - GROUP_DLC raw: '%s'", v.c_str());
+        v = getLangSTR(DLC_LABEL);
+        log_info("DEBUG LANG - DLC_LABEL raw: '%s'", v.c_str());
         if (!v.empty()) { static std::string s2 = v; group_labels_non_pkg_zone[2] = s2.c_str(); }
 
-        v = getLangSTR(GROUP_THEME);
-        log_info("DEBUG LANG - GROUP_THEME raw: '%s'", v.c_str());
+        v = getLangSTR(THEME_LABEL);
+        log_info("DEBUG LANG - THEME_LABEL raw: '%s'", v.c_str());
         if (!v.empty()) { static std::string s3 = v; group_labels_non_pkg_zone[3] = s3.c_str(); }
 
-        v = getLangSTR(GROUP_APP);
-        log_info("DEBUG LANG - GROUP_APP raw: '%s'", v.c_str());
+        v = getLangSTR(APP_LABEL);
+        log_info("DEBUG LANG - APP_LABEL raw: '%s'", v.c_str());
         if (!v.empty()) { static std::string s4 = v; group_labels_non_pkg_zone[4] = s4.c_str(); }
 
-        v = getLangSTR(GROUP_UNKNOWN);
-        log_info("DEBUG LANG - GROUP_UNKNOWN raw: '%s'", v.c_str());
+        v = getLangSTR(UNKNOWN_LABEL);
+        log_info("DEBUG LANG - UNKNOWN_LABEL raw: '%s'", v.c_str());
         if (!v.empty()) { static std::string s5 = v; group_labels_non_pkg_zone[5] = s5.c_str(); }
 
-        v = getLangSTR(GROUP_OTHER);
-        log_info("DEBUG LANG - GROUP_OTHER raw: '%s'", v.c_str());
+        v = getLangSTR(OTHER_LABEL);
+        log_info("DEBUG LANG - OTHER_LABEL raw: '%s'", v.c_str());
         if (!v.empty()) { static std::string s6 = v; group_labels_non_pkg_zone[6] = s6.c_str(); }
 
         log_info("init_group_labels: finished successfully.");
