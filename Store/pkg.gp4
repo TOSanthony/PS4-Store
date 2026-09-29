@@ -56,6 +56,14 @@
     <file targ_path="Media/settings.ini" orig_path="../App Media-Assets/Media/settings.ini" />
     <file targ_path="eboot.bin" orig_path="../Store-Loader/eboot.bin" />
     <file targ_path="homebrew.elf" orig_path="homebrew.elf" />
+    <file targ_path="assets/category_icons/game.png" orig_path="../App Media-Assets/category_icons/game.png" />
+    <file targ_path="assets/category_icons/patch.png" orig_path="../App Media-Assets/category_icons/patch.png" />
+    <file targ_path="assets/category_icons/dlc.png" orig_path="../App Media-Assets/category_icons/dlc.png" />
+    <file targ_path="assets/category_icons/theme.png" orig_path="../App Media-Assets/category_icons/theme.png" />
+    <file targ_path="assets/category_icons/app.png" orig_path="../App Media-Assets/category_icons/app.png" />
+    <file targ_path="assets/category_icons/unknown.png" orig_path="../App Media-Assets/category_icons/unknown.png" />
+    <file targ_path="assets/category_icons/other.png" orig_path="../App Media-Assets/category_icons/other.png" />
+    <file targ_path="assets/category_icons/settings.png" orig_path="../App Media-Assets/category_icons/settings.png" />
   </files>
   <rootdir>
     <dir targ_name="sce_sys" />
