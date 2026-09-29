@@ -702,6 +702,24 @@ void GLES2_render_layout_v2(std::shared_ptr<layout_t>  &l, int unused)
             rr.push_back( selection_box );
             ORBIS_RenderFillRects(USE_COLOR, grey, rr, 1);
             rr.clear();
+
+            vec2 icon_p1 = {20, 850};
+            vec2 icon_p2 = {52, 882};
+             
+            vec4 icon_rect;
+             
+            icon_rect.xy = px_pos_to_normalized(&icon_p1);
+            icon_rect.zw = px_pos_to_normalized(&icon_p2);
+            icon_rect.yw = icon_rect.wy;
+             
+            on_GLES2_Render_icon(
+                USE_COLOR,
+                category_icons[0],
+                2,
+                icon_rect
+            );
+
+            
         }
         if(l == icon_panel)
         {   // draw squared icons 
