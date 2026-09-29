@@ -280,6 +280,8 @@ bool load_embdded_eng()
 
 #endif
 
+extern void init_group_labels();
+
 bool LoadLangs(int LangCode)
 {
     std::string dst;
