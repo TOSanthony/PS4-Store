@@ -136,12 +136,21 @@ std::vector<item_t> analyze_item_t_v2(std::vector<item_t>& items, int numb) {
         ret[i].token_c = numb + 1;
         ret[i].token_d.resize(ret[i].token_c);
 
+        //if (!ret[i].token_d.empty()) {
+            //item_idx_t &t = ret[i].token_d[ID];
+            //ret[i].token_c = 0;
+            //t.off = group_label[i - 1];
+            //t.len = 0;
+        //}
+
         if (!ret[i].token_d.empty()) {
             item_idx_t &t = ret[i].token_d[ID];
             ret[i].token_c = 0;
-            t.off = group_label[i - 1];
+            // Utilisé pour le tri APPTYPE
+            t.off = group_labels_non_pkg_zone[i - 1];
             t.len = 0;
         }
+        
     }
 
     ret[0].token_c = count - 1;
@@ -163,13 +172,24 @@ std::vector<item_t> analyze_item_t_v2(std::vector<item_t>& items, int numb) {
 
     int check = 0;
     for (int i = 1; i < count; i++) {
+        //if (!ret[i].token_d.empty()) {
+            //item_idx_t &t = ret[i].token_d[0];
+            //t.off = group_label[i - 1];
+            //log_info("%d %s", i, t.off.c_str());
+            //ret[i].token_d.resize(ret[i].token_c + 1);
+            //check += ret[i].token_c;
+        //}
+
         if (!ret[i].token_d.empty()) {
             item_idx_t &t = ret[i].token_d[0];
-            t.off = group_label[i - 1];
-            log_info("%d %s", i, t.off.c_str());
+            // Clé interne utilisée pour le classement
+            t.off = group_labels_non_pkg_zone[i - 1];
+            // Affichage du titre traduit
+            log_info("%d %s", i, group_label[i - 1].c_str());
             ret[i].token_d.resize(ret[i].token_c + 1);
             check += ret[i].token_c;
         }
+        
     }
 
     log_info("Sorted %d items across %d Groups", check, ret[0].token_c + 1);
