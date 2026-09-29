@@ -27,6 +27,8 @@
     <file targ_path="assets/settings.png" orig_path="../App Media-Assets/assets/settings.png" />
     <file targ_path="assets/theme.png" orig_path="../App Media-Assets/assets/theme.png" />
     <file targ_path="assets/unknown.png" orig_path="../App Media-Assets/assets/unknown.png" />
+	<file targ_path="assets/install.png" orig_path="../App Media-Assets/assets/install.png" />
+	<file targ_path="assets/queue.png" orig_path="../App Media-Assets/assets/queue.png" />
     <file targ_path="assets/load.png" orig_path="../App Media-Assets/assets/load.png" />
     <file targ_path="langs/0/lang.ini" orig_path="../App Media-Assets/langs/0/lang.ini" />
     <file targ_path="langs/1/lang.ini" orig_path="../App Media-Assets/langs/1/lang.ini" />
