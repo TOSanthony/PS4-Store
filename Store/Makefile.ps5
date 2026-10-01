@@ -1,14 +1,11 @@
-# Package metadata.
 TITLE       := Store
 VERSION     := 2.00
 TITLE_ID    := NPXS39041
 CONTENT_ID  := IV0002-NPXS39041_00-STOREPS500000000
 
-# Root vars
 TOOLCHAIN   := $(OO_PS4_TOOLCHAIN)
 
-# Check for linux vs macOS
-UNAME_S     := $(shell uname -s)
+UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S),Linux)
 CDIR := linux
@@ -18,24 +15,5 @@ ifeq ($(UNAME_S),Darwin)
 CDIR := macos
 endif
 
-all: Store-R2-PS5.pkg
-
-Store-R2-PS5.pkg: pkg.gp4
-	$(TOOLCHAIN)/bin/$(CDIR)/PkgTool.Core pkg_build $< .
-
-# Use existing PS5 param.sfo
-pkg.gp4: homebrew.elf sce_sys/ps5_param.sfo
-	@mkdir -p sce_sys
-	@cp sce_sys/ps5_param.sfo sce_sys/param.sfo.tmp
-	@touch $@
-
-homebrew.elf:
-	@if [ ! -f homebrew.elf ]; then \
-		echo "Error: homebrew.elf not found. Run 'make' first."; \
-		exit 1; \
-	fi
-
-clean:
-	rm -f Store-R2-PS5.pkg
-	rm -f pkg.gp4
-	rm -f sce_sys/param.sfo.tmp
+all:
+	@echo "PS5 package uses existing homebrew.elf"
