@@ -1,4 +1,4 @@
-name: Build PS4 Store
+name: Build PS4 & PS5 Store
 
 on:
   push:
@@ -13,6 +13,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        platform: [ps4, ps5]
 
     steps:
     - name: Checkout code
@@ -30,22 +33,35 @@ jobs:
         chmod +x "$GITHUB_WORKSPACE/OpenOrbis/PS4Toolchain/bin/linux/"*
         echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/OpenOrbis/PS4Toolchain" >> "$GITHUB_ENV"
 
-    - name: Build Store
+    - name: Build Store-Loader
+      run: |
+        cd Store-Loader
+        make clean
+        make -j$(nproc) oelf eboot
+
+    - name: Build Store (${{ matrix.platform }})
       run: |
         cd Store
         make clean
-        make -j$(nproc)
+        if [ "${{ matrix.platform }}" = "ps5" ]; then
+          make -j$(nproc) -f Makefile.ps5
+          PLATFORM_SUFFIX="-PS5"
+        else
+          make -j$(nproc)
+          PLATFORM_SUFFIX=""
+        fi
+        
         # PkgTool.Core names the output after content_id; rename for consistency
         pkg=$(ls *.pkg 2>/dev/null | head -1)
-        if [ -n "$pkg" ] && [ "$pkg" != "Store-R2.pkg" ]; then
-          mv "$pkg" Store-R2.pkg
+        if [ -n "$pkg" ] && [ "$pkg" != "Store-R2${PLATFORM_SUFFIX}.pkg" ]; then
+          mv "$pkg" "Store-R2${PLATFORM_SUFFIX}.pkg"
         fi
-        test -f Store-R2.pkg || { echo "Error: Store-R2.pkg was not created"; exit 1; }
+        
+        test -f "Store-R2${PLATFORM_SUFFIX}.pkg" || { echo "Error: Store-R2${PLATFORM_SUFFIX}.pkg was not created"; exit 1; }
         test -f homebrew.elf || { echo "Error: homebrew.elf was not created"; exit 1; }
+        
         # Regenerate remote.md5 so CDN operators can detect this build as an update
-        # (Store-Loader compares the *contents* of remote.md5 vs local.md5 to decide
-        # whether a new homebrew.elf needs to be downloaded).
-        md5sum homebrew.elf | awk '{print $1}' > remote.md5
+        md5sum homebrew.elf | awk '{print $1}' > "remote${PLATFORM_SUFFIX}.md5"
 
     - name: Determine store version
       id: version
@@ -56,26 +72,56 @@ jobs:
         test -n "$minor" || { echo "Error: could not determine VERSION_MINOR"; exit 1; }
         echo "tag=${major}.${minor}" >> "$GITHUB_OUTPUT"
 
-    - name: Upload PKG artifact
+    - name: Upload PKG artifact (${{ matrix.platform }})
       uses: actions/upload-artifact@v4
       with:
-        name: PS4-Store-PKG
+        name: PS4-Store-${{ matrix.platform }}-PKG
         path: |
-          Store/Store-R2.pkg
+          Store/Store-R2*.pkg
           Store/homebrew.elf
-          Store/remote.md5
+          Store/remote*.md5
+
+  publish:
+    needs: build
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Determine store version
+      id: version
+      run: |
+        major=$(grep -oP '#define\s+VERSION_MAJOR\s+\K[0-9]+' Store/include/defines.h)
+        minor=$(grep -oP '#define\s+VERSION_MINOR\s+\K[0-9]+' Store/include/defines.h)
+        echo "tag=${major}.${minor}" >> "$GITHUB_OUTPUT"
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: release-artifacts
+
+    - name: Organize release files
+      run: |
+        mkdir -p release-files
+        
+        # PS4 files
+        cp release-artifacts/PS4-Store-ps4-PKG/Store-R2.pkg release-files/Store-R2-PS4.pkg 2>/dev/null || true
+        cp release-artifacts/PS4-Store-ps4-PKG/remote.md5 release-files/remote-PS4.md5 2>/dev/null || true
+        cp release-artifacts/PS4-Store-ps4-PKG/homebrew.elf release-files/homebrew-PS4.elf 2>/dev/null || true
+        
+        # PS5 files
+        cp release-artifacts/PS4-Store-ps5-PKG/Store-R2-PS5.pkg release-files/ 2>/dev/null || true
+        cp release-artifacts/PS4-Store-ps5-PKG/remote-PS5.md5 release-files/ 2>/dev/null || true
+        cp release-artifacts/PS4-Store-ps5-PKG/homebrew.elf release-files/homebrew-PS5.elf 2>/dev/null || true
+        
+        ls -lah release-files/
 
     - name: Publish release
-      if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
       uses: softprops/action-gh-release@v2
       with:
-        # Tagged numerically (x.y) so the CDN server can compare this value
-        # against the currently deployed Store binary to decide whether an
-        # update is needed.
         tag_name: ${{ steps.version.outputs.tag }}
-        name: Store ${{ steps.version.outputs.tag }}
+        name: Store ${{ steps.version.outputs.tag }} (PS4 & PS5)
         prerelease: false
-        files: |
-          Store/Store-R2.pkg
-          Store/homebrew.elf
-          Store/remote.md5
+        files: release-files/*
