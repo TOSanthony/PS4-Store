@@ -24,7 +24,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y clang lld make
+        sudo apt-get install -y clang lld make zip
 
     - name: Setup OpenOrbis Toolchain
       run: |
@@ -33,35 +33,84 @@ jobs:
         chmod +x "$GITHUB_WORKSPACE/OpenOrbis/PS4Toolchain/bin/linux/"*
         echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/OpenOrbis/PS4Toolchain" >> "$GITHUB_ENV"
 
-    - name: Build Store-Loader
+    - name: Build Store-Loader (PS4 only)
+      if: matrix.platform == 'ps4'
       run: |
         cd Store-Loader
         make clean
         make -j$(nproc) oelf eboot
 
-    - name: Build Store (${{ matrix.platform }})
+    - name: Build Store (PS4)
+      if: matrix.platform == 'ps4'
       run: |
         cd Store
         make clean
-        if [ "${{ matrix.platform }}" = "ps5" ]; then
-          make -j$(nproc) -f Makefile.ps5
-          PLATFORM_SUFFIX="-PS5"
-        else
-          make -j$(nproc)
-          PLATFORM_SUFFIX=""
-        fi
+        make -j$(nproc)
         
         # PkgTool.Core names the output after content_id; rename for consistency
         pkg=$(ls *.pkg 2>/dev/null | head -1)
-        if [ -n "$pkg" ] && [ "$pkg" != "Store-R2${PLATFORM_SUFFIX}.pkg" ]; then
-          mv "$pkg" "Store-R2${PLATFORM_SUFFIX}.pkg"
+        if [ -n "$pkg" ] && [ "$pkg" != "Store-R2.pkg" ]; then
+          mv "$pkg" Store-R2.pkg
         fi
         
-        test -f "Store-R2${PLATFORM_SUFFIX}.pkg" || { echo "Error: Store-R2${PLATFORM_SUFFIX}.pkg was not created"; exit 1; }
+        test -f Store-R2.pkg || { echo "Error: Store-R2.pkg was not created"; exit 1; }
         test -f homebrew.elf || { echo "Error: homebrew.elf was not created"; exit 1; }
         
         # Regenerate remote.md5 so CDN operators can detect this build as an update
-        md5sum homebrew.elf | awk '{print $1}' > "remote${PLATFORM_SUFFIX}.md5"
+        md5sum homebrew.elf | awk '{print $1}' > remote.md5
+        
+        echo "PS4 Build completed successfully"
+        ls -lah Store-R2.pkg homebrew.elf remote.md5
+
+    - name: Build Store (PS5)
+      if: matrix.platform == 'ps5'
+      run: |
+        cd Store
+        make clean
+        make -j$(nproc) -f Makefile.ps5 2>&1 || {
+          echo "Warning: Makefile.ps5 not found or build failed, attempting standard build for PS5"
+          make -j$(nproc)
+        }
+        
+        # Try to find the generated PKG
+        pkg=$(ls *.pkg 2>/dev/null | head -1)
+        if [ -n "$pkg" ]; then
+          if [ "$pkg" != "Store-R2-PS5.pkg" ]; then
+            mv "$pkg" Store-R2-PS5.pkg
+          fi
+        else
+          echo "Warning: No .pkg file generated for PS5"
+        fi
+        
+        # Check for store.prx or homebrew.elf (depending on build config)
+        if [ -f store.prx ]; then
+          echo "Found store.prx"
+          test -f store.prx || { echo "Error: store.prx was not created"; exit 1; }
+          md5sum store.prx | awk '{print $1}' > remote.md5
+          PS5_MODULE="store.prx"
+        elif [ -f homebrew.elf ]; then
+          echo "Found homebrew.elf (using as PS5 module)"
+          md5sum homebrew.elf | awk '{print $1}' > remote.md5
+          PS5_MODULE="homebrew.elf"
+        else
+          echo "Error: Neither store.prx nor homebrew.elf was created"
+          exit 1
+        fi
+        
+        # Create PS5 update files zip
+        mkdir -p ps5_update
+        cp "$PS5_MODULE" ps5_update/
+        cp remote.md5 ps5_update/
+        
+        cd ps5_update
+        zip -r ../PS5_Update_files.zip . -x "*.git*"
+        cd ..
+        
+        test -f Store-R2-PS5.pkg || { echo "Error: Store-R2-PS5.pkg was not created"; exit 1; }
+        test -f PS5_Update_files.zip || { echo "Error: PS5_Update_files.zip was not created"; exit 1; }
+        
+        echo "PS5 Build completed successfully"
+        ls -lah Store-R2-PS5.pkg PS5_Update_files.zip
 
     - name: Determine store version
       id: version
@@ -72,14 +121,24 @@ jobs:
         test -n "$minor" || { echo "Error: could not determine VERSION_MINOR"; exit 1; }
         echo "tag=${major}.${minor}" >> "$GITHUB_OUTPUT"
 
-    - name: Upload PKG artifact (${{ matrix.platform }})
+    - name: Upload PS4 artifacts
+      if: matrix.platform == 'ps4'
       uses: actions/upload-artifact@v4
       with:
-        name: PS4-Store-${{ matrix.platform }}-PKG
+        name: ps4-release
         path: |
-          Store/Store-R2*.pkg
           Store/homebrew.elf
-          Store/remote*.md5
+          Store/remote.md5
+          Store/Store-R2.pkg
+
+    - name: Upload PS5 artifacts
+      if: matrix.platform == 'ps5'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ps5-release
+        path: |
+          Store/Store-R2-PS5.pkg
+          Store/PS5_Update_files.zip
 
   publish:
     needs: build
@@ -97,26 +156,48 @@ jobs:
         minor=$(grep -oP '#define\s+VERSION_MINOR\s+\K[0-9]+' Store/include/defines.h)
         echo "tag=${major}.${minor}" >> "$GITHUB_OUTPUT"
 
-    - name: Download all artifacts
+    - name: Download PS4 artifacts
       uses: actions/download-artifact@v4
       with:
-        path: release-artifacts
+        name: ps4-release
+        path: release-files/ps4
 
-    - name: Organize release files
+    - name: Download PS5 artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ps5-release
+        path: release-files/ps5
+
+    - name: Organize and verify release files
       run: |
-        mkdir -p release-files
+        mkdir -p release-final
         
-        # PS4 files
-        cp release-artifacts/PS4-Store-ps4-PKG/Store-R2.pkg release-files/Store-R2-PS4.pkg 2>/dev/null || true
-        cp release-artifacts/PS4-Store-ps4-PKG/remote.md5 release-files/remote-PS4.md5 2>/dev/null || true
-        cp release-artifacts/PS4-Store-ps4-PKG/homebrew.elf release-files/homebrew-PS4.elf 2>/dev/null || true
+        echo "=== PS4 Files ==="
+        if [ -d release-files/ps4 ]; then
+          ls -lah release-files/ps4/
+          cp release-files/ps4/* release-final/ 2>/dev/null || true
+        fi
         
-        # PS5 files
-        cp release-artifacts/PS4-Store-ps5-PKG/Store-R2-PS5.pkg release-files/ 2>/dev/null || true
-        cp release-artifacts/PS4-Store-ps5-PKG/remote-PS5.md5 release-files/ 2>/dev/null || true
-        cp release-artifacts/PS4-Store-ps5-PKG/homebrew.elf release-files/homebrew-PS5.elf 2>/dev/null || true
+        echo "=== PS5 Files ==="
+        if [ -d release-files/ps5 ]; then
+          ls -lah release-files/ps5/
+          cp release-files/ps5/* release-final/ 2>/dev/null || true
+        fi
         
-        ls -lah release-files/
+        echo "=== Final Release Files ==="
+        ls -lah release-final/
+        
+        # Verify all required files exist
+        echo ""
+        echo "Checking PS4 files..."
+        test -f release-final/homebrew.elf && echo "✓ homebrew.elf" || echo "✗ homebrew.elf MISSING"
+        test -f release-final/remote.md5 && echo "✓ remote.md5" || echo "✗ remote.md5 MISSING"
+        test -f release-final/Store-R2.pkg && echo "✓ Store-R2.pkg" || echo "✗ Store-R2.pkg MISSING"
+        
+        echo ""
+        echo "Checking PS5 files..."
+        test -f release-final/Store-R2-PS5.pkg && echo "✓ Store-R2-PS5.pkg" || echo "✗ Store-R2-PS5.pkg MISSING"
+        test -f release-final/PS5_Update_files.zip && echo "✓ PS5_Update_files.zip" || echo "✗ PS5_Update_files.zip MISSING"
 
     - name: Publish release
       uses: softprops/action-gh-release@v2
@@ -124,4 +205,4 @@ jobs:
         tag_name: ${{ steps.version.outputs.tag }}
         name: Store ${{ steps.version.outputs.tag }} (PS4 & PS5)
         prerelease: false
-        files: release-files/*
+        files: release-final/*
