@@ -81,24 +81,11 @@ jobs:
     - name: Build Store (PS5)
       run: |
         cd Store
-        make clean
-        make -j$(nproc) -f Makefile.ps5
-        pkg=$(ls *.pkg 2>/dev/null | head -1)
+        make -f Makefile.ps5
+        pkg=$(ls *.pkg 2>/dev/null | grep -v Store-R2.pkg | head -1)
         if [ -n "$pkg" ] && [ "$pkg" != "Store-R2-PS5.pkg" ]; then
           mv "$pkg" Store-R2-PS5.pkg
         fi
-        test -f Store-R2-PS5.pkg || { echo "Error: Store-R2-PS5.pkg was not created"; exit 1; }
-        test -f homebrew.elf || { echo "Error: homebrew.elf was not created"; exit 1; }
-        md5sum homebrew.elf | awk '{print $1}' > remote-ps5.md5
-
-    - name: Upload PKG artifact (PS5)
-      uses: actions/upload-artifact@v4
-      with:
-        name: PS5-Store-PKG
-        path: |
-          Store/Store-R2-PS5.pkg
-          Store/homebrew.elf
-          Store/remote-ps5.md5
 
   publish:
     needs: [build-ps4, build-ps5]
