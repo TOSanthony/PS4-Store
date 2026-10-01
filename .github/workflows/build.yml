@@ -2,9 +2,13 @@ name: Build PS4 & PS5 Store
 
 on:
   push:
-    branches: [ master, main]
+    branches:
+      - master
+      - main
   pull_request:
-    branches: [ master, main]
+    branches:
+      - master
+      - main
   workflow_dispatch:
 
 permissions:
@@ -13,108 +17,143 @@ permissions:
 jobs:
   build-ps4:
     runs-on: ubuntu-22.04
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y clang lld make
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang lld make curl
 
-    - name: Setup OpenOrbis Toolchain
-      run: |
-        curl -sL https://github.com/LightningMods/OpenOrbis-PS4-Toolchain/releases/download/v0.50001/OOSDK.tar.gz \
-          | tar -xz -C "$GITHUB_WORKSPACE"
-        chmod +x "$GITHUB_WORKSPACE/OpenOrbis/PS4Toolchain/bin/linux/"*
-        echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/OpenOrbis/PS4Toolchain" >> "$GITHUB_ENV"
+      - name: Setup OpenOrbis Toolchain
+        run: |
+          curl -sL https://github.com/LightningMods/OpenOrbis-PS4-Toolchain/releases/download/v0.50001/OOSDK.tar.gz | tar -xz -C "$GITHUB_WORKSPACE"
 
-    - name: Build Store (PS4)
-      run: |
-        cd Store
-        make clean
-        make -j$(nproc)
-        pkg=$(ls *.pkg 2>/dev/null | head -1)
-        if [ -n "$pkg" ] && [ "$pkg" != "Store-R2.pkg" ]; then
-          mv "$pkg" Store-R2.pkg
-        fi
-        test -f Store-R2.pkg || { echo "Error: Store-R2.pkg was not created"; exit 1; }
-        test -f homebrew.elf || { echo "Error: homebrew.elf was not created"; exit 1; }
-        md5sum homebrew.elf | awk '{print $1}' > remote.md5
+          chmod +x "$GITHUB_WORKSPACE/OpenOrbis/PS4Toolchain/bin/linux/"*
 
-    - name: Determine store version
-      id: version
-      run: |
-        major=$(grep -oP '#define\s+VERSION_MAJOR\s+\K[0-9]+' Store/include/defines.h)
-        minor=$(grep -oP '#define\s+VERSION_MINOR\s+\K[0-9]+' Store/include/defines.h)
-        test -n "$major" || { echo "Error: could not determine VERSION_MAJOR"; exit 1; }
-        test -n "$minor" || { echo "Error: could not determine VERSION_MINOR"; exit 1; }
-        echo "tag=${major}.${minor}" >> "$GITHUB_OUTPUT"
+          echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/OpenOrbis/PS4Toolchain" >> "$GITHUB_ENV"
 
-    - name: Upload PKG artifact (PS4)
-      uses: actions/upload-artifact@v4
-      with:
-        name: PS4-Store-PKG
-        path: |
-          Store/Store-R2.pkg
-          Store/homebrew.elf
-          Store/remote.md5
+      - name: Build Store (PS4)
+        run: |
+          cd Store
+
+          make clean
+          make -j$(nproc)
+
+          pkg=$(ls *.pkg 2>/dev/null | head -1)
+
+          if [ -n "$pkg" ] && [ "$pkg" != "Store-R2.pkg" ]; then
+            mv "$pkg" Store-R2.pkg
+          fi
+
+          test -f Store-R2.pkg || {
+            echo "Store-R2.pkg not created"
+            exit 1
+          }
+
+          test -f homebrew.elf || {
+            echo "homebrew.elf not created"
+            exit 1
+          }
+
+          md5sum homebrew.elf | awk '{print $1}' > remote.md5
+
+      - name: Upload PS4 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PS4-Store-PKG
+          path: |
+            Store/Store-R2.pkg
+            Store/homebrew.elf
+            Store/remote.md5
 
   build-ps5:
     runs-on: ubuntu-22.04
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y clang lld make
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang lld make curl
 
-    - name: Setup OpenOrbis Toolchain
-      run: |
-        curl -sL https://github.com/LightningMods/OpenOrbis-PS4-Toolchain/releases/download/v0.50001/OOSDK.tar.gz \
-          | tar -xz -C "$GITHUB_WORKSPACE"
-        chmod +x "$GITHUB_WORKSPACE/OpenOrbis/PS4Toolchain/bin/linux/"*
-        echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/OpenOrbis/PS4Toolchain" >> "$GITHUB_ENV"
+      - name: Setup OpenOrbis Toolchain
+        run: |
+          curl -sL https://github.com/LightningMods/OpenOrbis-PS4-Toolchain/releases/download/v0.50001/OOSDK.tar.gz | tar -xz -C "$GITHUB_WORKSPACE"
 
-    - name: Build Store (PS5)
-      run: |
-        cd Store
-        make -f Makefile.ps5
-        pkg=$(ls *.pkg 2>/dev/null | grep -v Store-R2.pkg | head -1)
-        if [ -n "$pkg" ] && [ "$pkg" != "Store-R2-PS5.pkg" ]; then
-          mv "$pkg" Store-R2-PS5.pkg
-        fi
+          chmod +x "$GITHUB_WORKSPACE/OpenOrbis/PS4Toolchain/bin/linux/"*
+
+          echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/OpenOrbis/PS4Toolchain" >> "$GITHUB_ENV"
+
+      - name: Build Store (PS5)
+        run: |
+          cd Store
+
+          # Génère eboot.bin requis par Makefile.ps5
+          make clean
+          make -j$(nproc)
+
+          # Compile la version PS5
+          make -f Makefile.ps5
+
+          pkg=$(ls *.pkg 2>/dev/null | grep -v Store-R2.pkg | head -1)
+
+          if [ -n "$pkg" ] && [ "$pkg" != "Store-R2-PS5.pkg" ]; then
+            mv "$pkg" Store-R2-PS5.pkg
+          fi
+
+          test -f Store-R2-PS5.pkg || {
+            echo "Store-R2-PS5.pkg not created"
+            exit 1
+          }
+
+          md5sum Store-R2-PS5.pkg | awk '{print $1}' > remote-ps5.md5
+
+      - name: Upload PS5 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PS5-Store-PKG
+          path: |
+            Store/Store-R2-PS5.pkg
+            Store/remote-ps5.md5
 
   publish:
-    needs: [build-ps4, build-ps5]
-    runs-on: ubuntu-22.04
+    needs:
+      - build-ps4
+      - build-ps5
+
     if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
 
+    runs-on: ubuntu-22.04
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Determine store version
-      id: version
-      run: |
-        major=$(grep -oP '#define\s+VERSION_MAJOR\s+\K[0-9]+' Store/include/defines.h)
-        minor=$(grep -oP '#define\s+VERSION_MINOR\s+\K[0-9]+' Store/include/defines.h)
-        echo "tag=${major}.${minor}" >> "$GITHUB_OUTPUT"
+      - name: Determine store version
+        id: version
+        run: |
+          major=$(grep -oP '#define\s+VERSION_MAJOR\s+\K[0-9]+' Store/include/defines.h)
+          minor=$(grep -oP '#define\s+VERSION_MINOR\s+\K[0-9]+' Store/include/defines.h)
 
-    - name: Download all artifacts
-      uses: actions/download-artifact@v4
+          echo "tag=${major}.${minor}" >> "$GITHUB_OUTPUT"
 
-    - name: Publish release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: ${{ steps.version.outputs.tag }}
-        name: Store ${{ steps.version.outputs.tag }} (PS4 & PS5)
-        prerelease: false
-        files: |
-          PS4-Store-PKG/Store-R2.pkg
-          PS4-Store-PKG/homebrew.elf
-          PS4-Store-PKG/remote.md5
-          PS5-Store-PKG/Store-R2-PS5.pkg
-          PS5-Store-PKG/remote-ps5.md5
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Store ${{ steps.version.outputs.tag }} (PS4 & PS5)
+          prerelease: false
+          files: |
+            PS4-Store-PKG/Store-R2.pkg
+            PS4-Store-PKG/homebrew.elf
+            PS4-Store-PKG/remote.md5
+            PS5-Store-PKG/Store-R2-PS5.pkg
+            PS5-Store-PKG/remote-ps5.md5
