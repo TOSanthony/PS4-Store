@@ -38,7 +38,7 @@ jobs:
       run: |
         cd Store-Loader
         make clean
-        make -j$(nproc) oelf eboot
+        make -j$(nproc)
 
     - name: Build Store (PS4)
       if: matrix.platform == 'ps4'
