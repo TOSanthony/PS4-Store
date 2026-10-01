@@ -4,10 +4,10 @@ VERSION     := 2.00
 TITLE_ID    := NPXS39041
 CONTENT_ID  := IV0002-NPXS39041_00-STOREPS500000000
 
-# Libraries linked into the ELF (PS5 specific - same as PS4 but with different order).
+# Libraries linked into the ELF (PS5 specific).
 LIBS        := -luser_mem_sys -lc++ -lz -ljbc -lc -lkernel -lcurl -lpolarssl -lSceVideoOut -lSceNet -lSceSysmodule -lSceAudioOut -lSceUserService -lSceSysmodule -lSceFreeType \
                -lScePad -lSceSystemService -lSceNet -lSceSsl -lSceHttp -lSDL2 -lSceCommonDialog -lSceMsgDialog \
-               -lorbisGl2 -lorbisGl -lorbisPad -lpng -lSceImeDialog -lSceIme -lSceBgft -lSceAppInstUtil -lSceLibcInternal -lfreetype-gl -lsqlite -lSceLncUtil
+               -lorbisGl -lorbisGl2 -lorbisGl -lorbisPad -lpng -lSceImeDialog -lSceIme -lSceBgft -lSceAppInstUtil -lSceLibcInternal -lfreetype-gl -lsqlite -lSceLncUtil
 
 
 # Additional compile flags (PS5 specific).
