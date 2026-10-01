@@ -15,6 +15,7 @@ permissions:
   contents: write
 
 jobs:
+
   build-ps4:
     runs-on: ubuntu-22.04
 
@@ -92,25 +93,34 @@ jobs:
       - name: Build Store (PS5)
         run: |
           cd Store
-      
-          # build PS4 pour générer homebrew.elf
+
+          # Génère homebrew.elf
           make clean
           make -j$(nproc)
-      
-          # build PS5
+
+          # Génère le package PS5
           make -f Makefile.ps5
-      
-          mv IV0002-NPXS39041_00-STOREPS500000000.pkg Store-R2-PS5.pkg 2>/dev/null || true
-      
+
+          pkg=$(ls *.pkg 2>/dev/null | grep STOREPS5 | head -1)
+
+          if [ -n "$pkg" ]; then
+            mv "$pkg" Store-R2-PS5.pkg
+          fi
+
+          test -f Store-R2-PS5.pkg || {
+            echo "Store-R2-PS5.pkg not created"
+            exit 1
+          }
+
           md5sum Store-R2-PS5.pkg | awk '{print $1}' > remote-ps5.md5
-      
-            - name: Upload PS5 artifact
-              uses: actions/upload-artifact@v4
-              with:
-                name: PS5-Store-PKG
-                path: |
-                  Store/Store-R2-PS5.pkg
-                  Store/remote-ps5.md5
+
+      - name: Upload PS5 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PS5-Store-PKG
+          path: |
+            Store/Store-R2-PS5.pkg
+            Store/remote-ps5.md5
 
   publish:
     needs:
