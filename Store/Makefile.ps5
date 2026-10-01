@@ -11,10 +11,11 @@ TOOLCHAIN   := $(OO_PS4_TOOLCHAIN)
 UNAME_S     := $(shell uname -s)
 
 ifeq ($(UNAME_S),Linux)
-		CDIR    := linux
+CDIR := linux
 endif
+
 ifeq ($(UNAME_S),Darwin)
-		CDIR    := macos
+CDIR := macos
 endif
 
 all: Store-R2-PS5.pkg
@@ -22,17 +23,19 @@ all: Store-R2-PS5.pkg
 Store-R2-PS5.pkg: pkg.gp4
 	$(TOOLCHAIN)/bin/$(CDIR)/PkgTool.Core pkg_build $< .
 
-# Use existing PS5 param.sfo - don't generate a new one
-pkg.gp4: eboot.bin sce_sys/ps5_param.sfo
+# Use existing PS5 param.sfo
+pkg.gp4: homebrew.elf sce_sys/ps5_param.sfo
 	@mkdir -p sce_sys
 	@cp sce_sys/ps5_param.sfo sce_sys/param.sfo.tmp
 	@touch $@
 
-eboot.bin:
-	@if [ ! -f eboot.bin ]; then \
-		echo "Error: eboot.bin not found. Run 'make' first to build PS4 version."; \
+homebrew.elf:
+	@if [ ! -f homebrew.elf ]; then \
+		echo "Error: homebrew.elf not found. Run 'make' first."; \
 		exit 1; \
 	fi
 
 clean:
-	rm -f Store-R2-PS5.pkg pkg.gp4 sce_sys/param.sfo.tmp
+	rm -f Store-R2-PS5.pkg
+	rm -f pkg.gp4
+	rm -f sce_sys/param.sfo.tmp
